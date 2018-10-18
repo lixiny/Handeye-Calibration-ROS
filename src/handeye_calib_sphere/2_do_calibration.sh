@@ -5,6 +5,7 @@ fi
 
 rm -rf dataset/color_*
 
+
 touch handeye_result.xml
 rosrun  handeye_calib_sphere eyeinhand_calib_node
 wait
