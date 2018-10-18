@@ -242,7 +242,7 @@ int main(int argc, char** argv)
 
         std_msgs::Header header;
         header.stamp = ros::Time::now();
-        header.frame_id = "camera_optical_frame";
+        header.frame_id = "camera_joint";
 
         cv_bridge::CvImage cv_color;
         cv_color.header = header;
@@ -255,7 +255,7 @@ int main(int argc, char** argv)
         cv_depth.encoding = sensor_msgs::image_encodings::TYPE_32FC1;
 
         cloud_scene->header.stamp = ros::Time::now().toSec();
-        cloud_scene->header.frame_id = "camera_optical_frame";
+        cloud_scene->header.frame_id = "camera_joint";
         cloud_pub.publish(cloud_scene);
 
         image_pub_color.publish(cv_color.toImageMsg());

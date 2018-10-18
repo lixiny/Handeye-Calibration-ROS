@@ -212,6 +212,18 @@ vector<string> getFilesInDirectory ( string cate_dir ) {
 
 int main(int argc, char** argv )
 {
+
+    /**
+    1. read icp output and store them in TJs = {{tj1} {tj2} {tj3}...}
+    2. read tf from robot base to hand, store rotation in QIs = {{qi1} {qi2} {qi3}...}
+    3. read tf from robot base to hand, store translation in TIs = {{ti1} {ti2} {ti3} ...}
+    4. calculate qx, tx from chessboard, as initial value for optimization
+    5  measure tb as initial value for optimization
+    6. construct least square problem
+    */
+
+
+
     vector<Eigen::Vector4d> TJs;  // icp translations as pure imaginary quaternion(0;x;y;z)
     vector<Eigen::Vector4d> TIs;  // tf transaltions as pure imaginary quaternion (0;x;y;z)
     vector<Eigen::Vector4d> QIs;  // tf rotations as quaternion
