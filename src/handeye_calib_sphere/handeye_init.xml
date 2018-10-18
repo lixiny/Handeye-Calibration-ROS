@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<opencv_storage>
+<robotposes type_id="opencv-matrix">
+  <rows>1</rows>
+  <cols>7</cols>
+  <dt>d</dt>
+  <data>
+    -0.18245    0.68262    0.18339   0.683455    
+    0.09277     0.11082    0.005
+  </data>
+</robotposes>
+</opencv_storage>

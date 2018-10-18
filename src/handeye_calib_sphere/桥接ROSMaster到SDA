@@ -1,0 +1,2 @@
+export ROS_MASTER_URI=http://sda:11311
+
