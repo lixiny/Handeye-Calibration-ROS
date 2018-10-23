@@ -45,3 +45,5 @@ build/*
 devel/*
 .idea
 .catkin_workspace
+cmake-build-debug
+
