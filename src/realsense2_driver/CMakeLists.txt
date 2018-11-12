@@ -139,6 +139,8 @@ add_executable(realsense2_driver src/realsense2_driver.cpp)
 add_executable(realsense2_server src/realsense2_server.cpp)
 #add_executable(grab_pointcloud_demo src/grab_pointcloud_demo.cpp)
 
+add_dependencies(realsense2_server rgbd_srv_gencpp)
+
 target_link_libraries(realsense2_driver
    ${catkin_LIBRARIES}
    ${OpenCV_LIBS}

@@ -94,7 +94,7 @@ add_executable(grab_data_node
     src/grab_data_node.cpp
     src/calibration_tool.cpp
     src/aruco_plane.cpp)
-
+add_dependencies(grab_data_node rgbd_srv_gencpp)
 target_link_libraries(grab_data_node
 	${catkin_LIBRARIES}
 	${OpenCV_LIBS}
