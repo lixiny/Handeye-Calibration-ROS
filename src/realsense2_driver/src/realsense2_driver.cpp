@@ -75,7 +75,7 @@ int main(int argc, char** argv)
     //   rs2::pipeline_profile profile = pipe.start(); // this is the default config, cause some delay.
     rs2_intrinsics intrinsics;
     rs2::colorizer color_map;
-
+    
     // Each depth camera might have different units for depth pixels, so we get it here
     // Using the pipeline's profile, we can retrieve the device that the pipeline uses
     float depth_scale = get_depth_scale(profile.get_device());
@@ -139,7 +139,6 @@ int main(int argc, char** argv)
     br.sendTransform(tf::StampedTransform(transform_b, ros::Time::now(),
                                           "camera_joint", "camera_optical_frame"));
 
-
     PointCloud::Ptr cloud_scene (new PointCloud);                                     
 
 
@@ -149,9 +148,9 @@ int main(int argc, char** argv)
         if (profile_changed(pipe.get_active_profile().get_streams(), profile.get_streams()))
         {
             //If the profile was changed, update the align object, and also get the new device's depth scale
-            profile = pipe.get_active_profile();
-            align_to = find_stream_to_align(profile.get_streams());
-            align = rs2::align(align_to);
+            profile     = pipe.get_active_profile();
+            align_to    = find_stream_to_align(profile.get_streams());
+            align       = rs2::align(align_to);
             depth_scale = get_depth_scale(profile.get_device());
         }
 
