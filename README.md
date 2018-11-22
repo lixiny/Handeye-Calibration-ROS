@@ -20,28 +20,26 @@ handeyeCalibWithDepthCamera is freely available for free non-commercial use, and
 
 ## Prerequisit
 * **Ubuntu 16.04** 
-* **ROS Kinetic Kame**  // full install 
-* **PCL 1.7+ ** (should be included in ROS Kinetic Kame)
-* **OpenCV 3.3** (should be included in ROS Kinetic Kame)
-* **cv_bridge**
-`sudo apt-get install ros-kinetic-cv-bridge`
-* **Eigen3**  (should be included in Ubutnu 16.04)  
-`sudo apt-get install libeigen3-dev`
+* **ROS Kinetic Kame**  // full install  
+* **PCL 1.7+ ** (should be included in ROS Kinetic Kame)   
+* **OpenCV 3.3** (should be included in ROS Kinetic Kame)   
+* **cv_bridge**  
+`sudo apt-get install ros-kinetic-cv-bridge`  
+* **Eigen3**  (should be included in Ubutnu 16.04)    
+`sudo apt-get install libeigen3-dev`  
 * **Sophus** (https://github.com/stonier/sophus)  // standard `make && make install `
-* **Ceres** (http://ceres-solver.org/) // follow the installation guild
+* **Ceres** (http://ceres-solver.org/) // follow the installation guild  
 * **librealsense2** (https://github.com/IntelRealSense/librealsense) :  
 We use the `librealsense2` version to drive Intel RealSense ZR300 Camera. and wrap it by ROS topics and services. Our `realsense2_driver` need the `librealsense2.so`. The recommended way to install it is by following the Linux guide:(https://github.com/IntelRealSense/librealsense/blob/master/doc/distribution_linux.md) 
 , or as below:   
-```
-## Register the server's public key :
-sudo apt-key adv --keyserver keys.gnupg.net --recv-key C8B3A55A6F3EFCDE || sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key C8B3A55A6F3EFCDE
-## Add the server to the list of repositories in Ubuntu 16 LTS:
-sudo add-apt-repository "deb http://realsense-hw-public.s3.amazonaws.com/Debian/apt-repo xenial main" -u
-## Then:
-sudo apt-get update
-## And install by `apt-get` :
-sudo apt-get install librealsense2-dev
-```
+Register the server's public key :  
+`sudo apt-key adv --keyserver keys.gnupg.net --recv-key C8B3A55A6F3EFCDE || sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key C8B3A55A6F3EFCDE`  
+Add the server to the list of repositories in Ubuntu 16 LTS:  
+`sudo add-apt-repository "deb http://realsense-hw-public.s3.amazonaws.com/Debian/apt-repo xenial main" -u`  
+Then:      
+`sudo apt-get update`    
+And install by `apt-get` :     
+`sudo apt-get install librealsense2-dev`   
 
 ## Compile  `calib_ws`
 standard ROS workspace `catkin_make` procedure; 
