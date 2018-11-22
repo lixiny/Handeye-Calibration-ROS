@@ -1,6 +1,6 @@
 # Robotic Hand-eye Calibration with Depth Camera Using Sphere-Model
-This repository is the backup for my part @  ***JingDong GRASPING ROBOT CHALLENGE ***
-Also the implements of my paper  ***Robotic hand-eye calibration with depth camera: A sphere model approach***
+This repository is the backup for my part @  ** *JingDong GRASPING ROBOT CHALLENGE* **
+Also the implements of my paper: ** *Robotic hand-eye calibration with depth camera: A sphere model approach* **
 
 | **`Ubuntu 1604 & ROS Kinetic Kame`** |
 ## Related Publications:    
@@ -60,8 +60,9 @@ cd calib_ws
 source devel/setup.bash
 roslaunch realsense2_driver realsense_driver.launch
 ```
-when it shows the INFO like: 
- ![Alt text](./1540283789175.png)
+when it shows the INFO like:   
+
+<img src="doc/camera_info.png", width="400">
 
 means the realsense2_driver is successfully tuned up. 
 
