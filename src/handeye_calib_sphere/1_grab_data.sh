@@ -13,7 +13,9 @@ fi
 ##				[robot_end_link]  							机器人末端 tf_link 
 ##				[robot_base_link]							机器人基座 tf_link
 ##                                                  
-rosrun handeye_calib_sphere grab_data_node camera_intrinsic_color.xml 6 /ee_link /base
+#rosrun handeye_calib_sphere grab_data_node camera_intrinsic_color.xml 6 /ee_link /base
+
+roslaunch handeye_calib_sphere
 wait 
 
 echo "Now you have finished grabing data, type  ./2_do_calibration.sh  to continue"

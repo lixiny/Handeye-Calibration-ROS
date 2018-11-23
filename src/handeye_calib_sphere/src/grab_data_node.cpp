@@ -9,18 +9,17 @@ using namespace cv;
 #define KEYCODE_SPACE   0x20
 #define KEYCODE_ESC     0x1B
 
-const string ROBOT_POSE_FILENAME = "robot_pose.xml";
-string  output_path;
-string  robot_end_link;
-string  robot_base_link;
+string  robotPoseOutput;
+string  cameraIntrinsicInput;
+string  EETFname;
+string  baseTFname;
+bool    useQrExtractor;
+bool    recordingTF;
+int     numOfQRcodeOnSide;
 
 Mat cameraMatrix;
 Mat distCoeffs;
 
-bool qrFLAG = false;
-bool tfFLAG = false;
-
-int numOfQRcodeOnSide = 0;
 
 enum class USAGE
 {
@@ -41,64 +40,81 @@ int kbhit(void);
 int main(int argc, char** argv)
 {
     cout << "\n\n";
-    if (argc == 2) {
-        usage = USAGE::STANDALONE;
-        cout << "USAGE::STANDALONE" << endl;
-    } else if (argc == 3) {  
-        numOfQRcodeOnSide = atoi(argv[2]);
-        if (numOfQRcodeOnSide == 0) {
-            usage = USAGE::STANDALONE;
-            cout << "USAGE::STANDALONE" << endl;
-        } else {
-            usage = USAGE::WITH_QR_EXTRACTOR;
-            cout << "USAGE::WITH_QR_EXTRACTOR" << endl;
-            qrFLAG = true;
-        }
-    } else if (argc == 4) {
-        usage = USAGE::WITH_ROBOT_TF_POSE;
-        cout << "USAGE::WITH_ROBOT_TF_POSE" << endl;
-        robot_end_link = argv[2];
-        robot_base_link = argv[3];
-        tfFLAG = true;
-    } else if (argc == 5) { 
-        numOfQRcodeOnSide = atoi(argv[2]);
-        robot_end_link = argv[3];
-        robot_base_link = argv[4];
-        tfFLAG = true;
-        if (numOfQRcodeOnSide == 0) {
-            usage = USAGE::WITH_ROBOT_TF_POSE;
-            cout << "USAGE::WITH_ROBOT_TF_POSE" << endl;
-        } else {
-            usage = USAGE::WITH_QR_EXTRACTOR_AND_ROBOT_TF_POSE;
-            cout << "USAGE::WITH_QR_EXTRACTOR_AND_ROBOT_TF_POSE" << endl;
-            qrFLAG = true;
-        }
-    } else {
 
-        cerr << "Arguments ERROR!" << endl;
-        cerr << "Usage:  rosrun  sphere_handeye  grab_data_node  [camera_intrinsics_file].xml \n";
-        cerr << "Or   :  rosrun  sphere_handeye  grab_data_node  [camera_intrinsics_file].xml  [#_of_qr_codes_on_each_side? 0 if_none] \n";
-        cerr << "Or   :  rosrun  sphere_handeye  grab_data_node  [camera_intrinsics_file].xml  [robot_end_link]  [robot_base_link]  \n";
-        cerr << "Or   :  rosrun  sphere_handeye  grab_data_node  [camera_intrinsics_file].xml  [#_of_qr_codes_on_each_side? 0 if_none]  [robot_end_link]  [robot_base_link] \n";
+    ros::init ( argc, argv, "grab_data_node" );
+    ros::NodeHandle nh("~");
+
+    nh.param("useQrExtractor", useQrExtractor, false);
+    nh.param("recordingTF", recordingTF, false);
+    nh.param("robotPoseOutput" , robotPoseOutput, std::string("robot_pose.xml"));
+    nh.param("cameraIntrinsicInput", cameraIntrinsicInput, std::string("camera_intrinsic_color.xml"));
+    nh.param("numOfQRcodeOnSide", numOfQRcodeOnSide, 0);
+    nh.param("EETF", EETFname, std::string("/ee_link"));
+    nh.param("baseTF", baseTFname, std::string("/base_link"));
+
+    cout << useQrExtractor <<" " << recordingTF << " " << robotPoseOutput << " " << cameraIntrinsicInput <<endl;
+
+    cout << "Reading Camera Intrinsic File from : " << cameraIntrinsicInput << endl;
+
+    if (! calibtool::initCameraIntrinsic(cameraIntrinsicInput, cameraMatrix, distCoeffs)) {
+        cerr << "cannot locate [camera_intrinsics] XML file || [camera_intrinsics] XML file contains invalid data. Program will exit." << endl;
         return -1;
     }
+
+    if(useQrExtractor) {
+        if(numOfQRcodeOnSide != 6) {
+            cerr << "wrong settings to Aruco plate! Program will exit. try to set [numOfQRcodeOnSide] to 0 in [.launch] instead)" << endl;
+            return -2;
+        }
+    }
+
+    // if (argc == 2) {
+    //     usage = USAGE::STANDALONE;
+    //     cout << "USAGE::STANDALONE" << endl;
+    // } else if (argc == 3) {  
+    //     numOfQRcodeOnSide = atoi(argv[2]);
+    //     if (numOfQRcodeOnSide == 0) {
+    //         usage = USAGE::STANDALONE;
+    //         cout << "USAGE::STANDALONE" << endl;
+    //     } else {
+    //         usage = USAGE::WITH_QR_EXTRACTOR;
+    //         cout << "USAGE::WITH_QR_EXTRACTOR" << endl;
+    //         qrFLAG = true;
+    //     }
+    // } else if (argc == 4) {
+    //     usage = USAGE::WITH_ROBOT_TF_POSE;
+    //     cout << "USAGE::WITH_ROBOT_TF_POSE" << endl;
+    //     robot_end_link = argv[2];
+    //     robot_base_link = argv[3];
+    //     tfFLAG = true;
+    // } else if (argc == 5) { 
+    //     numOfQRcodeOnSide = atoi(argv[2]);
+    //     robot_end_link = argv[3];
+    //     robot_base_link = argv[4];
+    //     tfFLAG = true;
+    //     if (numOfQRcodeOnSide == 0) {
+    //         usage = USAGE::WITH_ROBOT_TF_POSE;
+    //         cout << "USAGE::WITH_ROBOT_TF_POSE" << endl;
+    //     } else {
+    //         usage = USAGE::WITH_QR_EXTRACTOR_AND_ROBOT_TF_POSE;
+    //         cout << "USAGE::WITH_QR_EXTRACTOR_AND_ROBOT_TF_POSE" << endl;
+    //         qrFLAG = true;
+    //     }
+    // } else {
+
+    //     cerr << "Arguments ERROR!" << endl;
+    //     cerr << "Usage:  rosrun  sphere_handeye  grab_data_node  [camera_intrinsics_file].xml \n";
+    //     cerr << "Or   :  rosrun  sphere_handeye  grab_data_node  [camera_intrinsics_file].xml  [#_of_qr_codes_on_each_side? 0 if_none] \n";
+    //     cerr << "Or   :  rosrun  sphere_handeye  grab_data_node  [camera_intrinsics_file].xml  [robot_end_link]  [robot_base_link]  \n";
+    //     cerr << "Or   :  rosrun  sphere_handeye  grab_data_node  [camera_intrinsics_file].xml  [#_of_qr_codes_on_each_side? 0 if_none]  [robot_end_link]  [robot_base_link] \n";
+    //     return -1;
+    // }
 
     cout << "Init Complete" << endl;
-    const string CAMERA_DATA_FILE  =  argv[1];
-    cout << "Reading Camera Intrinsic File from : " << CAMERA_DATA_FILE << endl;
-
-    if (! calibtool::initCameraIntrinsic(CAMERA_DATA_FILE, cameraMatrix, distCoeffs)) {
-        cout << "cannot locate [camera_intrinsics] XML file || [camera_intrinsics] XML file contains invalid data" << endl;
-        return -1;
-    }
-
     int fileSavedCounter = 1;
 
     Mat rgb_image, rgb_temp;
     Mat depth_image;
-
-    ros::init ( argc, argv, "grab_data_node" );
-    ros::NodeHandle nh;
     ros::ServiceClient client = nh.serviceClient<rgbd_srv::rgbd> ( "realsense2_server" ); // bind client to server
     rgbd_srv::rgbd srv;   // serivce type
     srv.request.start = true;
@@ -106,7 +122,7 @@ int main(int argc, char** argv)
     sensor_msgs::Image msg_depth;
 
     tf::TransformListener tfListener;
-    tf::StampedTransform tfTransform;
+    tf::StampedTransform  tfTransform;
 
     ros::Rate loop_rate ( 60 );
 
@@ -117,7 +133,7 @@ int main(int argc, char** argv)
 
     float cubeSide = 0;
 
-    if( qrFLAG ) 
+    if( useQrExtractor ) 
     {
 
         //################## cube extractor #######################
@@ -134,7 +150,9 @@ int main(int argc, char** argv)
 
     while( ros::ok() ) 
     {
+        cout << "calling service" << endl;
         if ( client.call( srv )) { // client send request(call server), when success, return a bool true
+            cout << "calling service success" << endl;
             try
             {
                 msg_rgb = srv.response.rgb_image;
@@ -148,8 +166,8 @@ int main(int argc, char** argv)
 
                 if ( !rgb_image.data || !depth_image.data )
                 {
-                    printf ( "Fatal: current no image data!  \n" );
-                    return -1;
+                    cout << "Fatal: current no image data!  \n" << endl;
+                    continue;
                 }
 
             } catch ( cv_bridge::Exception& e ) {
@@ -157,15 +175,16 @@ int main(int argc, char** argv)
                 return -1;
             }
             /** ---------------------------------------------------------------------------------------- */
-            if ( tfFLAG ) {
+            if ( recordingTF ) {
                 try
                 {
                     /** get the latest tfTransform from robot_base_link(source) to robot_end_link(target) */
-                    tfListener.lookupTransform ( robot_end_link, robot_base_link, ros::Time ( 0 ), tfTransform );  
+                    tfListener.lookupTransform ( EETFname, baseTFname, ros::Time ( 0 ), tfTransform );  
                     
                 } catch ( tf::TransformException ex ) {
                     ROS_ERROR("%s", ex.what());
                     cout << "Warning: current may not have tf data! " << endl;
+                    continue;
                 }
             }
 
@@ -176,26 +195,26 @@ int main(int argc, char** argv)
             continue;
         }
 
-        Eigen::Matrix4f transform, transform_inv;
-
-        if ( qrFLAG ) 
-        {
-
-            if ( !arucoPlane->calculateExtrinsicFromImage( rgb_image ) ) {
-                continue;
-
-            }
-            transform     = arucoPlane->getTransform().cast<float>();
-            transform_inv = transform.inverse();
-            arucoPlane->drawingAxis(rgb_temp);
-
-        }
-        
+        cout << "showing image" << endl;
         imshow("color", rgb_temp);
         imshow("depth", depth_image);
         waitKey(1);
 
 
+        Eigen::Matrix4f transform, transform_inv;
+
+        if ( useQrExtractor ) 
+        {
+
+            if ( !arucoPlane->calculateExtrinsicFromImage( rgb_image ) ) {
+                cout << "3" << endl;
+                continue;
+            }
+            transform     = arucoPlane->getTransform().cast<float>();
+            transform_inv = transform.inverse();
+            arucoPlane->drawingAxis(rgb_temp);
+        }
+        
         cloud_scene->clear();
         for (int r=0;r<depth_image.rows;r++)
         {
@@ -216,7 +235,7 @@ int main(int argc, char** argv)
                    distCoeffs );
 
 
-                if (qrFLAG) {
+                if ( useQrExtractor ) {
                     Eigen::Vector4f scene_point;
                     scene_point << scenePoint(0),scenePoint(1),scenePoint(2),1;
                     Eigen::Matrix<float,4,1> world_point;
@@ -225,7 +244,7 @@ int main(int argc, char** argv)
                     if( (abs(world_point(0)) > cubeSide/2)  ||  // outside of cube bundary
                         (abs(world_point(1)) > cubeSide/2) ||
                         (world_point(2) > cubeSide) ||
-                        (world_point(2) < 0.05f))
+                        (world_point(2) < -0.05f))
                     {
                         continue;
                     }
@@ -275,9 +294,9 @@ int main(int argc, char** argv)
             } else {
                 
                 cout<<"saving data..." << endl;
-                if (tfFLAG) {
+                if (recordingTF) {
                     calibtool::saveStampedImgPointcloudTFPose(cloud_scene, 
-                        rgb_temp, tfTransform, fileSavedCounter, ROBOT_POSE_FILENAME);
+                        rgb_temp, tfTransform, fileSavedCounter, robotPoseOutput);
                 } else {
                     calibtool::saveStampedImgPointcloud(cloud_scene, rgb_temp, fileSavedCounter);
                 }
