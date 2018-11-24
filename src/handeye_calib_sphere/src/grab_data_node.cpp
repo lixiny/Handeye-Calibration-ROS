@@ -13,6 +13,8 @@ string  robotPoseOutput;
 string  cameraIntrinsicInput;
 string  EETFname;
 string  baseTFname;
+string  RGBDserviceName;
+string  dataOutputDir;
 bool    useQrExtractor;
 bool    recordingTF;
 int     numOfQRcodeOnSide;
@@ -33,6 +35,8 @@ enum class USAGE
 
 int kbhit(void);
 int getch();
+void extractPlaneFeatureFromCloud(pcl::PointCloud<pcl::PointXYZRGBA>::Ptr& cloud_source,
+  pcl::PointCloud<pcl::PointXYZRGBA>::Ptr& cloud_destin);
 
 // ################################### main function ###########################################
 int main(int argc, char** argv)
@@ -44,11 +48,17 @@ int main(int argc, char** argv)
 
     nh.param("useQrExtractor", useQrExtractor, false);
     nh.param("recordingTF", recordingTF, false);
-    nh.param("robotPoseOutput" , robotPoseOutput, std::string("robot_pose.xml"));
-    nh.param("cameraIntrinsicInput", cameraIntrinsicInput, std::string("camera_intrinsic_color.xml"));
+    nh.param("robotPoseOutput" , robotPoseOutput, std::string("./robot_pose.xml"));
+    nh.param("cameraIntrinsicInput", cameraIntrinsicInput, std::string("./camera_intrinsic_color.xml"));
     nh.param("numOfQRcodeOnSide", numOfQRcodeOnSide, 0);
     nh.param("EETF", EETFname, std::string("/ee_link"));
     nh.param("baseTF", baseTFname, std::string("/base_link"));
+    nh.param("RGBDserviceName",  RGBDserviceName,  std::string("realsense2_server"));
+    nh.param("dataOutputDir", dataOutputDir, std::string("./dataset") );
+
+    cout << "robotPoseOutput " << robotPoseOutput << endl;
+    cout << "dataOutputDir " << dataOutputDir << endl;
+    cout << RGBDserviceName << endl;
 
     cout << useQrExtractor <<" " << recordingTF << " " << robotPoseOutput << " " << cameraIntrinsicInput <<endl;
 
@@ -72,7 +82,7 @@ int main(int argc, char** argv)
     Mat rgb_image, rgb_temp;
     Mat depth_image;
     ros::NodeHandle nh2;
-    ros::ServiceClient client = nh2.serviceClient<rgbd_srv::rgbd> ( "realsense2_server" ); // bind client to server
+    ros::ServiceClient client = nh2.serviceClient<rgbd_srv::rgbd> ( RGBDserviceName ); // bind client to server
     rgbd_srv::rgbd srv;   // serivce type
     srv.request.start = true;
     sensor_msgs::Image msg_rgb;
@@ -100,6 +110,8 @@ int main(int argc, char** argv)
         pArucoPlane->setCameraIntrinsic(cameraMatrix, distCoeffs);
         cout << "INFO:  Using aruco extractor " <<endl;
     }
+
+    pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud_scene ( new pcl::PointCloud<pcl::PointXYZRGBA>() );
 
     while( ros::ok() )
     {
@@ -161,11 +173,15 @@ int main(int argc, char** argv)
             }
         }
 
+        vector<pcl::PointXYZRGBA, Eigen::aligned_allocator<pcl::PointXYZRGBA>>().swap(cloud_scene->points);
+    	cloud_scene->clear();
+
+
         imshow("color", rgb_temp);
         imshow("depth", depth_image);
         waitKey(1);
 
-        pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud_scene ( new pcl::PointCloud<pcl::PointXYZRGBA>() );
+        
         for (int r=0;r<depth_image.rows;r++)
         {
             for (int c=0;c<depth_image.cols;c++)
@@ -193,7 +209,7 @@ int main(int argc, char** argv)
                     if( (abs(world_point(0)) > cubeSide/2)  ||  // outside of cube bundary
                         (abs(world_point(1)) > cubeSide/2) ||
                         (world_point(2) > cubeSide) ||
-                        (world_point(2) < -0.05f))
+                        (world_point(2) < -0.003f))
                     {
                         continue;
                     }
@@ -229,65 +245,41 @@ int main(int argc, char** argv)
 
         chrono::steady_clock::time_point t6 = chrono::steady_clock::now();
         chrono::duration<double> time_used = chrono::duration_cast<chrono::duration<double>>( t6-t3 );
-        cout << "##### time used by processing pointclouds: " << time_used.count() << endl;
+        // cout << "##### time used by processing pointclouds: " << time_used.count() << endl;
 
+
+        viewer.removeAllPointClouds();
         viewer.addPointCloud ( cloud_scene, "cloud_scene" );
         viewer.addCoordinateSystem ( 1.0 );
         viewer.spinOnce();
-        viewer.removeAllPointClouds();
-        
-        vector<pcl::PointXYZRGBA, Eigen::aligned_allocator<pcl::PointXYZRGBA>>().swap(cloud_scene->points);
-        cloud_scene->clear();
 
-        key = getch();
-        if(key == 's' || key == 'S') {
-            cout<<"saving data..." << endl;
-            if (recordingTF) {
-                calibtool::saveStampedImgPointcloudTFPose(cloud_scene,
-                                                            rgb_temp, tfTransform, fileSavedCounter, robotPoseOutput);
-            } else {
-                calibtool::saveStampedImgPointcloud(cloud_scene, rgb_temp, fileSavedCounter);
-            }
-
-            fileSavedCounter++;
-
-        } else if(key == 'q' || key == 'Q') {
-            cout<<"\n Finishing grab data ..."<<endl;
-            viewer.close();
-            ros::shutdown();
-
-        } else if(key == 'c' || key == 'C') {
-
-        } else {
-            cerr << key << " pressed" << endl;
-        }
-
-//        if( kbhit())   //space down
-//        {
-//            char c = getchar();
-//            if(c == KEYCODE_ESC)
-//            {
-//                cout<<"\n Finishing grab data ..."<<endl;
-//                viewer.close();
+       if( kbhit())   //space down
+       {
+           char c = getchar();
+           if(c == KEYCODE_ESC)
+           {
+               cout<<"\n Finishing grab data ..."<<endl;
+               viewer.close();
                 
-//                ros::shutdown();
-//                break;
-//            } else {
+               ros::shutdown();
+               break;
+           } else {
                 
-//                cout<<"saving data..." << endl;
-//                if (recordingTF) {
-//                    calibtool::saveStampedImgPointcloudTFPose(cloud_scene,
-//                        rgb_temp, tfTransform, fileSavedCounter, robotPoseOutput);
-//                } else {
-//                    calibtool::saveStampedImgPointcloud(cloud_scene, rgb_temp, fileSavedCounter);
-//                }
+               cout<<"saving data..." << endl;
+               if (recordingTF) {
+                   calibtool::saveStampedImgPointcloudTFPose(cloud_scene,
+                       rgb_temp, tfTransform, fileSavedCounter, robotPoseOutput, dataOutputDir);
+               
+               } else {
+                   calibtool::saveStampedImgPointcloud(cloud_scene, rgb_temp, fileSavedCounter, dataOutputDir);
+               }
 
-//                fileSavedCounter++;
-//            }
+               fileSavedCounter++;
+           }
 
-//        }
+       }
 
-        loop_rate.sleep();
+       loop_rate.sleep();
         // ros::spinOnce();
         
     }

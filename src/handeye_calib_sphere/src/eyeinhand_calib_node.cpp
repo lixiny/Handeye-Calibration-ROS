@@ -391,9 +391,9 @@ int main(int argc, char** argv )
     rot_mat = Tinv.matrix().block(0,0,2,2);
     // cout << rot_mat << endl;
     trans_vec = Tinv.matrix().block(0,3,2,3);
-    cout << " ********  translation from hand to camrea is: ********* \n " << trans_vec.transpose() << endl;
+    cout << " ********  translation from hand to camrea is: x y z ********* \n " << trans_vec.transpose() << endl;
     qinv = Eigen::Quaterniond(rot_mat);
-    cout << " ********  quaternions from hand to camera is: ********* \n" << qinv.x() << "" << qinv.y() << " " << qinv.z() << " " << qinv.w() << endl;
+    cout << " ********  quaternions from hand to camera is: qx qy qz qw ********* \n" << qinv.x() << "" << qinv.y() << " " << qinv.z() << " " << qinv.w() << endl;
 
     Mat Mat_handeye_result_1_7(1,7,CV_64F); 
     Mat_handeye_result_1_7.at<double>(0,0) = qinv.w();

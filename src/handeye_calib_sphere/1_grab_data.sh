@@ -15,7 +15,7 @@ fi
 ##                                                  
 #rosrun handeye_calib_sphere grab_data_node camera_intrinsic_color.xml 6 /ee_link /base
 
-roslaunch handeye_calib_sphere
+roslaunch handeye_calib_sphere grab_data.launch
 wait 
 
 echo "Now you have finished grabing data, type  ./2_do_calibration.sh  to continue"

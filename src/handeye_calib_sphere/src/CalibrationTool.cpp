@@ -36,11 +36,34 @@ void deprojectPixelToPoint(Eigen::Vector3f& point, int pixel_coloum, int pixel_r
 
 }
 
+void deprojectPixelToPoint2(Eigen::Vector3f& point, int pixel_coloum, int pixel_row, float depth, cv::Mat& cameraMatrix, cv::Mat& distCoeffs)
+{
+    float m_px, m_py, m_fx, m_fy, coeffs[5];
+    m_fx = cameraMatrix.at<float>(0,0);
+    m_fy = cameraMatrix.at<float>(1,1);
+    m_px = cameraMatrix.at<float>(0,2);
+    m_py = cameraMatrix.at<float>(1,2);
+    for (int i = 0; i < 5; i++){
+        coeffs[i] = distCoeffs.at<float>(0,i);
+    }
+
+    float x = (float(pixel_coloum) - m_px) / m_fx;
+    float y = (float(pixel_row) - m_py) / m_fy;
+
+
+    point(0) = depth * x;
+    point(1) = depth * y;
+    point(2) = depth;
+
+}
+
+
 
 
 void saveStampedImgPointcloud( const pcl::PointCloud<pcl::PointXYZRGBA>::Ptr& cloud,
                                const cv::Mat& image,
-                               const int& counter )
+                               const int& counter, 
+                               const string& dataOutputDir)
 {
     stringstream ss;
     string numstr;
@@ -50,12 +73,12 @@ void saveStampedImgPointcloud( const pcl::PointCloud<pcl::PointXYZRGBA>::Ptr& cl
         numstr = "0" + numstr;
     }
 
-    string imageFilename = "color_image_" + numstr + ".jpg";
-    string pcdFilename = "pointcloud_" + numstr + ".pcd";
+    string imageFilename = dataOutputDir + "/" + "color_image_" + numstr + ".jpg";
+    string pcdFilename = dataOutputDir + "/" + "pointcloud_" + numstr + ".pcd";
 
-    cv::imwrite( "dataset/" + imageFilename, image);
+    cv::imwrite(  imageFilename, image);
     std::cerr << "Saved " << imageFilename << endl;
-    pcl::io::savePCDFileASCII ( "dataset/" + pcdFilename, *cloud );
+    pcl::io::savePCDFileASCII (  pcdFilename, *cloud );
     std::cerr << "Saved " << cloud->points.size() << " points to " << pcdFilename << endl;
     std::cerr << "**************************************" << endl;
 }
@@ -95,7 +118,8 @@ void saveStampedImgPointcloudTFPose ( const pcl::PointCloud<pcl::PointXYZRGBA>::
                                       const cv::Mat& image,
                                       const tf::StampedTransform& tfpose,
                                       const int& counter,
-                                      const string& robot_pose_filename)
+                                      const string& robot_pose_filename,
+                                      const string& dataOutputDir )
 {
     stringstream ss;
     string numstr;
@@ -105,12 +129,12 @@ void saveStampedImgPointcloudTFPose ( const pcl::PointCloud<pcl::PointXYZRGBA>::
         numstr = "0" + numstr;
     }
 
-    string imageFilename = "color_image_" + numstr + ".jpg";
-    string pcdFilename = "pointcloud_" + numstr + ".pcd";
+    string imageFilename = dataOutputDir + "/" + "color_image_" + numstr + ".jpg";
+    string pcdFilename = dataOutputDir + "/" + "pointcloud_" + numstr + ".pcd";
 
-    cv::imwrite( "dataset/" + imageFilename, image);
+    cv::imwrite( imageFilename, image);
     std::cerr << "Saved " << imageFilename << endl;
-    pcl::io::savePCDFileASCII ( "dataset/" + pcdFilename, *cloud );
+    pcl::io::savePCDFileASCII ( pcdFilename, *cloud );
     std::cerr << "Saved " << cloud->points.size() << " points to " << pcdFilename << endl;
     std::cerr << "**************************************" << endl;
 
