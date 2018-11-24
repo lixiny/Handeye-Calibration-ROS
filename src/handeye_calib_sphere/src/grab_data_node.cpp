@@ -241,8 +241,20 @@ int main(int argc, char** argv)
 
         key = getch();
         if(key == 's' || key == 'S') {
+            cout<<"saving data..." << endl;
+            if (recordingTF) {
+                calibtool::saveStampedImgPointcloudTFPose(cloud_scene,
+                                                            rgb_temp, tfTransform, fileSavedCounter, robotPoseOutput);
+            } else {
+                calibtool::saveStampedImgPointcloud(cloud_scene, rgb_temp, fileSavedCounter);
+            }
+
+            fileSavedCounter++;
 
         } else if(key == 'q' || key == 'Q') {
+            cout<<"\n Finishing grab data ..."<<endl;
+            viewer.close();
+            ros::shutdown();
 
         } else if(key == 'c' || key == 'C') {
 
@@ -250,30 +262,30 @@ int main(int argc, char** argv)
             cerr << key << " pressed" << endl;
         }
 
-        if( kbhit())   //space down
-        {
-            char c = getchar();
-            if(c == KEYCODE_ESC)
-            {
-                cout<<"\n Finishing grab data ..."<<endl;
-                viewer.close();
+//        if( kbhit())   //space down
+//        {
+//            char c = getchar();
+//            if(c == KEYCODE_ESC)
+//            {
+//                cout<<"\n Finishing grab data ..."<<endl;
+//                viewer.close();
                 
-                ros::shutdown();
-                break;
-            } else {
+//                ros::shutdown();
+//                break;
+//            } else {
                 
-                cout<<"saving data..." << endl;
-                if (recordingTF) {
-                    calibtool::saveStampedImgPointcloudTFPose(cloud_scene, 
-                        rgb_temp, tfTransform, fileSavedCounter, robotPoseOutput);
-                } else {
-                    calibtool::saveStampedImgPointcloud(cloud_scene, rgb_temp, fileSavedCounter);
-                }
+//                cout<<"saving data..." << endl;
+//                if (recordingTF) {
+//                    calibtool::saveStampedImgPointcloudTFPose(cloud_scene,
+//                        rgb_temp, tfTransform, fileSavedCounter, robotPoseOutput);
+//                } else {
+//                    calibtool::saveStampedImgPointcloud(cloud_scene, rgb_temp, fileSavedCounter);
+//                }
 
-                fileSavedCounter++;
-            }
+//                fileSavedCounter++;
+//            }
 
-        }
+//        }
 
         loop_rate.sleep();
         // ros::spinOnce();
