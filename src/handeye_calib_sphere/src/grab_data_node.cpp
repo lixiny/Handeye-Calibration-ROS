@@ -20,7 +20,6 @@ int     numOfQRcodeOnSide;
 Mat cameraMatrix;
 Mat distCoeffs;
 
-
 enum class USAGE
 {
     STANDALONE                          ,  /** basic usage: only grab images and pointclouds */
@@ -32,9 +31,8 @@ enum class USAGE
 
 // ################################### function prototype ############################################
 
-void extractPlaneFeatureFromCloud(pcl::PointCloud<pcl::PointXYZRGBA>::Ptr& cloud_source,
-  pcl::PointCloud<pcl::PointXYZRGBA>::Ptr& cloud_destin);
 int kbhit(void);
+int getch();
 
 // ################################### main function ###########################################
 int main(int argc, char** argv)
@@ -57,65 +55,24 @@ int main(int argc, char** argv)
     cout << "Reading Camera Intrinsic File from : " << cameraIntrinsicInput << endl;
 
     if (! calibtool::initCameraIntrinsic(cameraIntrinsicInput, cameraMatrix, distCoeffs)) {
-        cerr << "cannot locate [camera_intrinsics] XML file || [camera_intrinsics] XML file contains invalid data. Program will exit." << endl;
+        cerr << "FATAL:  Cannot locate [camera_intrinsics] XML file Or [camera_intrinsics] XML file contains invalid data. Program will exit." << endl;
         return -1;
     }
 
     if(useQrExtractor) {
         if(numOfQRcodeOnSide != 6) {
-            cerr << "wrong settings to Aruco plate! Program will exit. try to set [numOfQRcodeOnSide] to 0 in [.launch] instead)" << endl;
-            return -2;
+            cerr << "WARNING: Wrong settings to Aruco plate!  will not use QrExtractor" << endl;
+            useQrExtractor = false;
         }
     }
 
-    // if (argc == 2) {
-    //     usage = USAGE::STANDALONE;
-    //     cout << "USAGE::STANDALONE" << endl;
-    // } else if (argc == 3) {  
-    //     numOfQRcodeOnSide = atoi(argv[2]);
-    //     if (numOfQRcodeOnSide == 0) {
-    //         usage = USAGE::STANDALONE;
-    //         cout << "USAGE::STANDALONE" << endl;
-    //     } else {
-    //         usage = USAGE::WITH_QR_EXTRACTOR;
-    //         cout << "USAGE::WITH_QR_EXTRACTOR" << endl;
-    //         qrFLAG = true;
-    //     }
-    // } else if (argc == 4) {
-    //     usage = USAGE::WITH_ROBOT_TF_POSE;
-    //     cout << "USAGE::WITH_ROBOT_TF_POSE" << endl;
-    //     robot_end_link = argv[2];
-    //     robot_base_link = argv[3];
-    //     tfFLAG = true;
-    // } else if (argc == 5) { 
-    //     numOfQRcodeOnSide = atoi(argv[2]);
-    //     robot_end_link = argv[3];
-    //     robot_base_link = argv[4];
-    //     tfFLAG = true;
-    //     if (numOfQRcodeOnSide == 0) {
-    //         usage = USAGE::WITH_ROBOT_TF_POSE;
-    //         cout << "USAGE::WITH_ROBOT_TF_POSE" << endl;
-    //     } else {
-    //         usage = USAGE::WITH_QR_EXTRACTOR_AND_ROBOT_TF_POSE;
-    //         cout << "USAGE::WITH_QR_EXTRACTOR_AND_ROBOT_TF_POSE" << endl;
-    //         qrFLAG = true;
-    //     }
-    // } else {
-
-    //     cerr << "Arguments ERROR!" << endl;
-    //     cerr << "Usage:  rosrun  sphere_handeye  grab_data_node  [camera_intrinsics_file].xml \n";
-    //     cerr << "Or   :  rosrun  sphere_handeye  grab_data_node  [camera_intrinsics_file].xml  [#_of_qr_codes_on_each_side? 0 if_none] \n";
-    //     cerr << "Or   :  rosrun  sphere_handeye  grab_data_node  [camera_intrinsics_file].xml  [robot_end_link]  [robot_base_link]  \n";
-    //     cerr << "Or   :  rosrun  sphere_handeye  grab_data_node  [camera_intrinsics_file].xml  [#_of_qr_codes_on_each_side? 0 if_none]  [robot_end_link]  [robot_base_link] \n";
-    //     return -1;
-    // }
-
-    cout << "Init Complete" << endl;
+    cout << "\n Init Complete ! \n" << endl;
     int fileSavedCounter = 1;
 
     Mat rgb_image, rgb_temp;
     Mat depth_image;
-    ros::ServiceClient client = nh.serviceClient<rgbd_srv::rgbd> ( "realsense2_server" ); // bind client to server
+    ros::NodeHandle nh2;
+    ros::ServiceClient client = nh2.serviceClient<rgbd_srv::rgbd> ( "realsense2_server" ); // bind client to server
     rgbd_srv::rgbd srv;   // serivce type
     srv.request.start = true;
     sensor_msgs::Image msg_rgb;
@@ -124,98 +81,91 @@ int main(int argc, char** argv)
     tf::TransformListener tfListener;
     tf::StampedTransform  tfTransform;
 
-    ros::Rate loop_rate ( 60 );
+    ros::Rate loop_rate ( 30 );
 
     pcl::visualization::PCLVisualizer viewer ( "3D viewer" );
     viewer.setBackgroundColor ( 40.0/255,40.0/255,52.0/255 );
 
-    handeye::ArucoPlane::Ptr arucoPlane;
+    handeye::ArucoPlanePtr pArucoPlane;
 
     float cubeSide = 0;
+    bool  validAruco = false;
+    int key = 0;
 
     if( useQrExtractor ) 
     {
-
-        //################## cube extractor #######################
-        handeye::ArucoPlane::Ptr arucoPlaneTemp ( new handeye::ArucoPlane(numOfQRcodeOnSide) );
-        arucoPlane = arucoPlaneTemp;
-        cubeSide   = arucoPlane->getCubeSide();
-        arucoPlane->setCameraIntrinsic(cameraMatrix, distCoeffs);
-        cout << "using aruco plane " <<endl;
-        //#########################################################
+        auto pArucoPlaneTemp =  make_shared<handeye::ArucoPlane>(numOfQRcodeOnSide);
+        pArucoPlane = pArucoPlaneTemp;
+        cubeSide   = pArucoPlane->getCubeSide();
+        pArucoPlane->setCameraIntrinsic(cameraMatrix, distCoeffs);
+        cout << "INFO:  Using aruco extractor " <<endl;
     }
 
-    pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud_scene ( new pcl::PointCloud<pcl::PointXYZRGBA>() );
-
-
-    while( ros::ok() ) 
+    while( ros::ok() )
     {
-        cout << "calling service" << endl;
-        if ( client.call( srv )) { // client send request(call server), when success, return a bool true
-            cout << "calling service success" << endl;
-            try
-            {
-                msg_rgb = srv.response.rgb_image;
-                msg_depth = srv.response.depth_image;
 
-                // use cv_bridge convert sensor_msgs::Image to cv::Mat
-                rgb_image = cv_bridge::toCvCopy ( msg_rgb, sensor_msgs::image_encodings::BGR8 )->image;
-                rgb_image.copyTo(rgb_temp);
-
-                depth_image = cv_bridge::toCvCopy ( msg_depth, sensor_msgs::image_encodings::TYPE_32FC1 )->image;
-
-                if ( !rgb_image.data || !depth_image.data )
-                {
-                    cout << "Fatal: current no image data!  \n" << endl;
-                    continue;
-                }
-
-            } catch ( cv_bridge::Exception& e ) {
-                ROS_ERROR ( "cv_bridge execption: %s", e.what() );
-                return -1;
-            }
-            /** ---------------------------------------------------------------------------------------- */
-            if ( recordingTF ) {
-                try
-                {
-                    /** get the latest tfTransform from robot_base_link(source) to robot_end_link(target) */
-                    tfListener.lookupTransform ( EETFname, baseTFname, ros::Time ( 0 ), tfTransform );  
-                    
-                } catch ( tf::TransformException ex ) {
-                    ROS_ERROR("%s", ex.what());
-                    cout << "Warning: current may not have tf data! " << endl;
-                    continue;
-                }
-            }
-
-
-        }
-
-        if (rgb_temp.empty() || depth_image.empty()) {
+        if ( ! client.call( srv )) {  // client send request(call server), when success, return a bool true
+            cerr << "ERROR:  Client want to get new image from realsense2_server but FAILED !" << endl;
+            loop_rate.sleep();
             continue;
         }
 
-        cout << "showing image" << endl;
+        try
+        {
+            msg_rgb = srv.response.rgb_image;
+            msg_depth = srv.response.depth_image;
+
+            // use cv_bridge convert sensor_msgs::Image to cv::Mat
+            rgb_image = cv_bridge::toCvCopy ( msg_rgb, sensor_msgs::image_encodings::BGR8 )->image;
+            rgb_image.copyTo(rgb_temp);
+
+            depth_image = cv_bridge::toCvCopy ( msg_depth, sensor_msgs::image_encodings::TYPE_32FC1 )->image;
+
+            if (rgb_temp.empty() || depth_image.empty()) {
+                cout << "WARNING:  Current no image data!  \n" << endl;
+                loop_rate.sleep();
+                continue;
+            }
+
+        } catch ( cv_bridge::Exception& e ) {
+            ROS_ERROR ( "cv_bridge execption: %s", e.what() );
+            return -1;
+        }
+
+        if ( recordingTF ) {
+            try
+            {
+                /** get the latest tfTransform from robot_base_link(source) to robot_end_link(target) */
+                tfListener.lookupTransform ( EETFname, baseTFname, ros::Time ( 0 ), tfTransform );
+
+            } catch ( tf::TransformException ex ) {
+                ROS_ERROR("%s", ex.what());
+                cout << "Warning: Current may not have tf data! " << endl;
+                loop_rate.sleep();
+                continue;
+            }
+        }
+
+        Eigen::Matrix4f transform, transform_inv;
+
+        chrono::steady_clock::time_point t3 = chrono::steady_clock::now();
+        if ( useQrExtractor ) 
+        {
+            validAruco = pArucoPlane->calculateExtrinsicFromImage( rgb_image ) ;
+            if ( validAruco ) {
+                transform     = pArucoPlane->getTransform().cast<float>();
+                transform_inv = transform.inverse();
+                pArucoPlane->drawingAxis(rgb_temp);
+            } else {
+                cout << "WARNING:  No Aruco Plane been Viewed !" << endl;
+            }
+        }
+
         imshow("color", rgb_temp);
         imshow("depth", depth_image);
         waitKey(1);
 
-
-        Eigen::Matrix4f transform, transform_inv;
-
-        if ( useQrExtractor ) 
-        {
-
-            if ( !arucoPlane->calculateExtrinsicFromImage( rgb_image ) ) {
-                cout << "3" << endl;
-                continue;
-            }
-            transform     = arucoPlane->getTransform().cast<float>();
-            transform_inv = transform.inverse();
-            arucoPlane->drawingAxis(rgb_temp);
-        }
-        
-        cloud_scene->clear();
+        pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud_scene ( new pcl::PointCloud<pcl::PointXYZRGBA>() );
         for (int r=0;r<depth_image.rows;r++)
         {
             for (int c=0;c<depth_image.cols;c++)
@@ -229,13 +179,12 @@ int main(int argc, char** argv)
                 float depth_in_meter = float ( depth_image.ptr<float> ( r ) [c] );
 
                 calibtool::deprojectPixelToPoint(scenePoint,
-                   c, r, 
-                   depth_in_meter,
-                   cameraMatrix,
-                   distCoeffs );
+                                                   c, r,
+                                                   depth_in_meter,
+                                                   cameraMatrix,
+                                                   distCoeffs );
 
-
-                if ( useQrExtractor ) {
+                if ( useQrExtractor && validAruco) {
                     Eigen::Vector4f scene_point;
                     scene_point << scenePoint(0),scenePoint(1),scenePoint(2),1;
                     Eigen::Matrix<float,4,1> world_point;
@@ -249,10 +198,11 @@ int main(int argc, char** argv)
                         continue;
                     }
                 }
-                // Eigen::Vector4f scene_point;
-                // scene_point << scenePoint(0),scenePoint(1),scenePoint(2),1;
-                // Eigen::Matrix<float,4,1> world_point;
-                // world_point = transfrom_inv * scene_point;
+
+                Eigen::Vector4f scene_point;
+                scene_point << scenePoint(0),scenePoint(1),scenePoint(2),1;
+                Eigen::Matrix<float,4,1> world_point;
+                world_point = transform_inv * scene_point;
 
                 p.x = scenePoint(0);
                 p.y = scenePoint(1);
@@ -270,16 +220,35 @@ int main(int argc, char** argv)
         cloud_scene->resize ( cloud_scene->height * cloud_scene->width );
         // extractPlaneFeatureFromCloud(cloud_scene, cloud_scene);
 
-        pcl::StatisticalOutlierRemoval<pcl::PointXYZRGBA> sor;
-        sor.setInputCloud(cloud_scene);
-        sor.setMeanK(50);   // mean value
-        sor.setStddevMulThresh(1.0);
-        sor.filter(*cloud_scene);
+        // ##  VERY TIME CONSUMING !!! 
+        // pcl::StatisticalOutlierRemoval<pcl::PointXYZRGBA> sor;
+        // sor.setInputCloud(cloud_scene);
+        // sor.setMeanK(50);   // mean value
+        // sor.setStddevMulThresh(1.0);
+        // sor.filter(*cloud_scene);
+
+        chrono::steady_clock::time_point t6 = chrono::steady_clock::now();
+        chrono::duration<double> time_used = chrono::duration_cast<chrono::duration<double>>( t6-t3 );
+        cout << "##### time used by processing pointclouds: " << time_used.count() << endl;
 
         viewer.addPointCloud ( cloud_scene, "cloud_scene" );
         viewer.addCoordinateSystem ( 1.0 );
-        viewer.spinOnce ( 1 );
+        viewer.spinOnce();
         viewer.removeAllPointClouds();
+        
+        vector<pcl::PointXYZRGBA, Eigen::aligned_allocator<pcl::PointXYZRGBA>>().swap(cloud_scene->points);
+        cloud_scene->clear();
+
+        key = getch();
+        if(key == 's' || key == 'S') {
+
+        } else if(key == 'q' || key == 'Q') {
+
+        } else if(key == 'c' || key == 'C') {
+
+        } else {
+            cerr << key << " pressed" << endl;
+        }
 
         if( kbhit())   //space down
         {
@@ -306,8 +275,8 @@ int main(int argc, char** argv)
 
         }
 
-        // ros::spinOnce();
         loop_rate.sleep();
+        // ros::spinOnce();
         
     }
 
@@ -352,6 +321,18 @@ void extractPlaneFeatureFromCloud(pcl::PointCloud<pcl::PointXYZRGBA>::Ptr& cloud
     extract.filter(*cloud_destin);
 }
 
+int getch() {
+    static struct termios oldt, newt;
+    tcgetattr(STDIN_FILENO, &oldt); // save old settings
+    newt = oldt;
+    newt.c_lflag &= ~(ICANON);               // disable buffering
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt); // apply new settings
+
+    int c = getchar(); // read character (non-blocking)
+
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldt); // restore old settings
+    return c;
+}
 
 int kbhit(void)
 {

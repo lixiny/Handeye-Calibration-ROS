@@ -12,7 +12,7 @@ namespace handeye
 class ArucoPlane
 {
 public:
-    typedef shared_ptr<ArucoPlane> Ptr;
+    
     //    typedef shared_ptr<ArucoPlane::QR> QRPtr;
 
     ArucoPlane ();
@@ -322,6 +322,8 @@ private:
                                                  };
     };
 };
+
+typedef shared_ptr<ArucoPlane> ArucoPlanePtr;
 
 }
 
