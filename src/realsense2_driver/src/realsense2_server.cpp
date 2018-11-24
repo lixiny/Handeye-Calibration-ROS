@@ -65,14 +65,14 @@ int main(int argc, char** argv)
 	ImageConverter ic; 
 	ros::NodeHandle n;
 	ros::ServiceServer service = n.advertiseService("realsense2_server", realsense2_server);
-
-	ros::Rate loop_rate(200);
-	while (ros::ok())
-	{
-		ros::spinOnce();
-		loop_rate.sleep();
-	}
 	ros::spin();
+
+	// ros::Rate loop_rate(200);
+	// while (ros::ok())
+	// {
+	// 	ros::spinOnce();
+	// 	loop_rate.sleep();
+	// }
 	return 0;
 }
 

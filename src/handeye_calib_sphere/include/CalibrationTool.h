@@ -1,7 +1,7 @@
-#ifndef CALIBRATION_TOOL_H
-#define CALIBRATION_TOOL_H
+#ifndef CALIBRATIONTOOL_H
+#define CALIBRATIONTOOL_H
 
-#include "common_include.h"
+#include "CommonInclude.h"
 #include "settings.h"
 
 
@@ -45,11 +45,6 @@ void saveStampedImgPointcloud( const pcl::PointCloud<pcl::PointXYZRGBA>::Ptr& cl
                                const int& counter );
                                
 void deprojectPixelToPoint(Eigen::Vector3f& point, int pixel_coloum, int pixel_row, float depth, cv::Mat& cameraMatrix, cv::Mat& distCoeffs);                               
-                               
-  
-  
-  
-  
-                               
+                                                              
 }
 #endif // CALIBRATION_TOOL_H

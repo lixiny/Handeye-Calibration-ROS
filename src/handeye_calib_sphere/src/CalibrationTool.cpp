@@ -1,6 +1,6 @@
 #include "settings.h"
-#include "calibration_tool.h"
-#include "common_include.h"
+#include "CalibrationTool.h"
+#include "CommonInclude.h"
 
 
 using namespace std;

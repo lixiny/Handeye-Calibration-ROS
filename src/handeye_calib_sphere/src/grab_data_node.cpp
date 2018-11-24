@@ -1,6 +1,6 @@
-#include "common_include.h"
-#include "calibration_tool.h"
-#include "aruco_plane.h"
+#include "CommonInclude.h"
+#include "CalibrationTool.h"
+#include "ArucoPlane.h"
 #include "rgbd_srv/rgbd.h"
 
 using namespace std;

@@ -92,8 +92,8 @@ add_definitions(${PCL_DEFINITIONS})
 
 add_executable(grab_data_node
     src/grab_data_node.cpp
-    src/calibration_tool.cpp
-    src/aruco_plane.cpp)
+    src/CalibrationTool.cpp
+    src/ArucoPlane.cpp)
 add_dependencies(grab_data_node rgbd_srv_gencpp)
 target_link_libraries(grab_data_node
 	${catkin_LIBRARIES}
@@ -105,7 +105,7 @@ target_link_libraries(grab_data_node
 
 add_executable(eyeinhand_calib_node
     src/eyeinhand_calib_node.cpp
-    src/calibration_tool.cpp)
+    src/CalibrationTool.cpp)
 
 target_link_libraries(eyeinhand_calib_node
 	${catkin_LIBRARIES}

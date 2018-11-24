@@ -1,4 +1,4 @@
-#include "aruco_plane.h"
+#include "ArucoPlane.h"
 
 using namespace std;
 using namespace cv;

@@ -1,7 +1,7 @@
-#ifndef ARUCO_PLANE_H
-#define ARUCO_PLANE_H
+#ifndef ARUCOPLANE_H
+#define ARUCOPLANE_H
 
-#include "common_include.h"
+#include "CommonInclude.h"
 
 using namespace std;
 using namespace cv;

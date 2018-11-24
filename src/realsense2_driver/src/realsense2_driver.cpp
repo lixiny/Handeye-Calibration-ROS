@@ -265,7 +265,7 @@ int main(int argc, char** argv)
                                               "camera_joint", 
                                               "camera_optical_frame"));
 
-        ros::spinOnce();
+        // ros::spinOnce();
         loop_rate.sleep();
 
     }
