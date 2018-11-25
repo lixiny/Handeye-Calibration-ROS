@@ -6,4 +6,6 @@
 
 
 
-rosrun tf static_transform_publisher  0.13297     0.12161    0.0    0.0    0.0   0.81919  0.57352   /ee_link /mera_joint 100
+rosrun tf static_transform_publisher -0.0335834918597  0.0434926399527  0.0534274435419  -0.01344849324  0.0109446889407  -0.919008261747    0.393857433039  /arm_left_link_tool0  /camera_link  100
+
+rosrun tf static_transform_publisher -0.0426610901036  0.0435682041765  0.0628709556475  -0.0213248179092  0.00884362796331  -0.893675406915  0.44811974902  /arm_left_link_tool0  /camera_link  100

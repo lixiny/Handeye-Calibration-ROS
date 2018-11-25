@@ -36,7 +36,7 @@ enum class USAGE
 int kbhit(void);
 int getch();
 void extractPlaneFeatureFromCloud(pcl::PointCloud<pcl::PointXYZRGBA>::Ptr& cloud_source,
-  pcl::PointCloud<pcl::PointXYZRGBA>::Ptr& cloud_destin);
+  									pcl::PointCloud<pcl::PointXYZRGBA>::Ptr& cloud_destin);
 
 // ################################### main function ###########################################
 int main(int argc, char** argv)
@@ -58,9 +58,7 @@ int main(int argc, char** argv)
 
     cout << "robotPoseOutput " << robotPoseOutput << endl;
     cout << "dataOutputDir " << dataOutputDir << endl;
-    cout << RGBDserviceName << endl;
-
-    cout << useQrExtractor <<" " << recordingTF << " " << robotPoseOutput << " " << cameraIntrinsicInput <<endl;
+    cout << "RGBDserviceName" <<  RGBDserviceName << endl;
 
     cout << "Reading Camera Intrinsic File from : " << cameraIntrinsicInput << endl;
 
@@ -209,7 +207,7 @@ int main(int argc, char** argv)
                     if( (abs(world_point(0)) > cubeSide/2)  ||  // outside of cube bundary
                         (abs(world_point(1)) > cubeSide/2) ||
                         (world_point(2) > cubeSide) ||
-                        (world_point(2) < -0.003f))
+                        (world_point(2) < 0.0f))
                     {
                         continue;
                     }
@@ -234,7 +232,7 @@ int main(int argc, char** argv)
         cloud_scene->height = 1;
         cloud_scene->width  = cloud_scene->points.size();
         cloud_scene->resize ( cloud_scene->height * cloud_scene->width );
-        // extractPlaneFeatureFromCloud(cloud_scene, cloud_scene);
+        extractPlaneFeatureFromCloud(cloud_scene, cloud_scene);
 
         // ##  VERY TIME CONSUMING !!! 
         // pcl::StatisticalOutlierRemoval<pcl::PointXYZRGBA> sor;

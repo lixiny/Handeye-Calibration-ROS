@@ -1,6 +1,0 @@
-<launch>
-	<node pkg="tf" type="static_transform_publisher" name="camera_pub" args="0 0 0  0 0 0 1    /camera_link /camera_rgb_optical_frame 1000"/>
-	<node pkg="kinect_driver" type="kinect_driver" name="kinect_driver" output="screen" />
-	<node pkg="kinect_driver" type="kinect_server" name="kinect_server" />
-</launch>
-

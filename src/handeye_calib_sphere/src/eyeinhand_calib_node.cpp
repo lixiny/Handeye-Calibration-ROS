@@ -237,6 +237,7 @@ int main(int argc, char** argv )
         return -1;
     }
 
+    vector<int> outlier;
     for (int i = 0; i < numOfFiles; i++)
     {
 
@@ -245,6 +246,13 @@ int main(int argc, char** argv )
         pcl::PointCloud<pcl::PointXYZRGBA>::Ptr model (new pcl::PointCloud<pcl::PointXYZRGBA>);
         pcl::PCDReader reader;
         reader.read<pcl::PointXYZRGBA>(allPointCloudFiles[i], *cloud);
+
+        pcl::StatisticalOutlierRemoval<pcl::PointXYZRGBA> sor;
+        sor.setInputCloud(cloud);
+        sor.setMeanK(50);   // mean value
+        sor.setStddevMulThresh(1.0);
+        sor.filter(*cloud);
+
         std::vector<int> inliers;
         pcl::SampleConsensusModelSphere<pcl::PointXYZRGBA>::Ptr
                 model_s(new pcl::SampleConsensusModelSphere<pcl::PointXYZRGBA> (cloud));
@@ -256,7 +264,14 @@ int main(int argc, char** argv )
         float x = sphereModel(0);
         float y = sphereModel(1);
         float z = sphereModel(2);
+        float r = sphereModel(3);
+        if(r >= 0.080 || r <= 0.070) {
+            outlier.push_back(i);
+            continue;
+        }
+
         Eigen::Vector4d TJ(0.0, x, y, z);
+        cout << "球心： " << x << " " << y << " " << z << "  半径： " << r << endl;
 
         TJs.push_back(TJ);
     }
@@ -271,6 +286,9 @@ int main(int argc, char** argv )
     // cout << tfPoses << endl;
     for (int i = 0; i < tfPoses.rows; i++)
     {
+        for(auto j : outlier){
+            if(i == j) continue;
+        }
         Eigen::Vector4d TI(0.0, tfPoses.at<double>(i,4), tfPoses.at<double>(i,5), tfPoses.at<double>(i,6));
         Eigen::Vector4d QI(tfPoses.at<double>(i,0), tfPoses.at<double>(i,1), tfPoses.at<double>(i,2), tfPoses.at<double>(i,3));
         TIs.push_back(TI);
@@ -313,7 +331,7 @@ int main(int argc, char** argv )
     Eigen::Vector3d trans_vec = Tinv.matrix().block(0,3,2,3);
     cout  << "init translation matrix is: \n" << trans_vec.transpose() << "\n\n";
     Eigen::Quaterniond qinv = Eigen::Quaterniond(rot_mat);
-    double x[10] = {qinv.w(), qinv.x(), qinv.y(), qinv.z(),    trans_vec(0), trans_vec(1), trans_vec(2),    1, 1, 1};
+    double x[10] = {qinv.w(), qinv.x(), qinv.y(), qinv.z(),    trans_vec(0), trans_vec(1), trans_vec(2),    -0.2, -1.5, 0.5};
 
     ceres::Problem problem;
 
@@ -355,7 +373,7 @@ int main(int argc, char** argv )
     options.linear_solver_type = ceres::DENSE_QR;
     options.minimizer_type = ceres::TRUST_REGION;
     options.trust_region_strategy_type = ceres::LEVENBERG_MARQUARDT;
-    options.num_threads = 3;
+    options.num_threads = 4;
     options.minimizer_progress_to_stdout = true;
 
     ceres::Solver::Summary summary;
@@ -393,7 +411,7 @@ int main(int argc, char** argv )
     trans_vec = Tinv.matrix().block(0,3,2,3);
     cout << " ********  translation from hand to camrea is: x y z ********* \n " << trans_vec.transpose() << endl;
     qinv = Eigen::Quaterniond(rot_mat);
-    cout << " ********  quaternions from hand to camera is: qx qy qz qw ********* \n" << qinv.x() << "" << qinv.y() << " " << qinv.z() << " " << qinv.w() << endl;
+    cout << " ********  quaternions from hand to camera is: qx qy qz qw ********* \n" << qinv.x() << " " << qinv.y() << " " << qinv.z() << " " << qinv.w() << endl;
 
     Mat Mat_handeye_result_1_7(1,7,CV_64F); 
     Mat_handeye_result_1_7.at<double>(0,0) = qinv.w();

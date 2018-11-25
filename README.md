@@ -23,8 +23,10 @@ handeyeCalibWithDepthCamera is freely available for free non-commercial use, and
 * **ROS Kinetic Kame**  // full install   
 * **PCL 1.7+** (should be included in ROS Kinetic Kame)
 * **OpenCV 3.3** (should be included in ROS Kinetic Kame)
-* **cv_bridge**
+* **cv_bridge**  
 `sudo apt-get install ros-kinetic-cv-bridge`
+* **visp_hand2eye_calibration_calibrator**  
+`sudo apt-get install ros-kinetic-visp-hand2eye-calibration`
 * **Eigen3**  (should be included in Ubutnu 16.04)  
 `sudo apt-get install libeigen3-dev`
 * **Sophus** (https://github.com/stonier/sophus)  // standard make and make install

@@ -26,7 +26,7 @@
       <param name="EETF"                 type="str"  value="$(arg EETF)" />
       <param name="baseTF"               type="str"  value="$(arg baseTF)" />
       <param name="useQrExtractor"       type="bool" value="true"/>
-      <param name="recordingTF"          type="bool" value="true"/>
+      <param name="recordingTF"          type="bool" value="false"/>
       <param name="numOfQRcodeOnSide"    type="int"  value="6" />
   </node>
 

@@ -95,6 +95,8 @@ add_executable(grab_data_node
     src/CalibrationTool.cpp
     src/ArucoPlane.cpp)
 add_dependencies(grab_data_node rgbd_srv_gencpp)
+
+
 target_link_libraries(grab_data_node
 	${catkin_LIBRARIES}
 	${OpenCV_LIBS}
@@ -114,6 +116,14 @@ target_link_libraries(eyeinhand_calib_node
 	${CERES_LIBRARIES}
 	${Sophus_LIBRARIES}
 	)
+	
+#add_executable(cam_transform_publisher
+#        src/cam_transform_publisher.cpp)
+#        
+#target_link_libraries(cam_transform_publisher
+#	${catkin_LIBRARIES}
+#	${OpenCV_LIBS}
+#	)
 
 
 
