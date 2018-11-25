@@ -81,7 +81,7 @@ public:
         : it(nh_), boardSize(boardSize_), squareSize(squareSize_), cameraMatrix(cameraMatrix_), distCoeffs(distCoeffs_)
     {
         // Subscrive to input video feed and publish output video feed
-        image_sub_rgb = it.subscribe("/realsense_sr300/ylx/rgb", 1, &ChessBoardExtractor::imageCb_rgb, this);
+        image_sub_rgb = it.subscribe("/kinect/rgb", 1, &ChessBoardExtractor::imageCb_rgb, this);
         cornerPositions = setBoardCornerPositions(boardSize, squareSize);
         // transform_b.setOrigin( tf::Vector3(0.0, 0.0, 0.0) );
         // transform_b.setRotation( tf::Quaternion(0, 0, 0, 1) );

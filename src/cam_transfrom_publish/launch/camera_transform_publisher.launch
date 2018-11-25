@@ -1,14 +1,14 @@
 <launch>
 
 
-  <arg name="cameraIntrinsicInput"  default="$(find camera_transform_publisher)/camera_intrinsic_color_realsense2.xml" />
+  <arg name="cameraIntrinsicInput"  default="$(find camera_transform_publisher)/camera_intrinsic_color_kinect.xml" />
 
   <node pkg="camera_transform_publisher" type="camera_transform_publisher" name="camera_transform_publisher" output="screen">
   <!-- handeye_calib_camodocal arg pass -->
       <param name="cameraIntrinsicInput" type="str"  value="$(arg cameraIntrinsicInput)" />
-      <param name="chessboardWidth"       type="int" value="11"/>
-      <param name="chessboardHeight"      type="int" value="8"/>
-      <param name="squareSize"    type="double"  value="0.01" />
+      <param name="chessboardWidth"       type="int" value="8"/>
+      <param name="chessboardHeight"      type="int" value="7"/>
+      <param name="squareSize"    type="double"  value="0.025" />
   </node>
 
 </launch>

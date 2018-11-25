@@ -331,7 +331,7 @@ int main(int argc, char** argv )
     Eigen::Vector3d trans_vec = Tinv.matrix().block(0,3,2,3);
     cout  << "init translation matrix is: \n" << trans_vec.transpose() << "\n\n";
     Eigen::Quaterniond qinv = Eigen::Quaterniond(rot_mat);
-    double x[10] = {qinv.w(), qinv.x(), qinv.y(), qinv.z(),    trans_vec(0), trans_vec(1), trans_vec(2),    -0.2, -1.5, 0.5};
+    double x[10] = {qinv.w(), qinv.x(), qinv.y(), qinv.z(),    trans_vec(0), trans_vec(1), trans_vec(2),     0.555795, -0.13587, 0.41631};
 
     ceres::Problem problem;
 
@@ -406,12 +406,11 @@ int main(int argc, char** argv )
     //cout << T.matrix() << endl;
     Tinv = T.inverse();
     //cout << Tinv.matrix() << endl;
-    rot_mat = Tinv.matrix().block(0,0,2,2);
     // cout << rot_mat << endl;
     trans_vec = Tinv.matrix().block(0,3,2,3);
-    cout << " ********  translation from hand to camrea is: x y z ********* \n " << trans_vec.transpose() << endl;
+    cout << " \n\n********  translation from hand to camrea is: x y z ********* \n " << trans_vec.transpose() << endl;
     qinv = Eigen::Quaterniond(rot_mat);
-    cout << " ********  quaternions from hand to camera is: qx qy qz qw ********* \n" << qinv.x() << " " << qinv.y() << " " << qinv.z() << " " << qinv.w() << endl;
+    cout << " \n\n********  quaternions from hand to camera is: qx qy qz qw ********* \n" << qinv.x() << " " << qinv.y() << " " << qinv.z() << " " << qinv.w() << endl;
 
     Mat Mat_handeye_result_1_7(1,7,CV_64F); 
     Mat_handeye_result_1_7.at<double>(0,0) = qinv.w();

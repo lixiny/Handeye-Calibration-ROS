@@ -207,7 +207,7 @@ int main(int argc, char** argv)
                     if( (abs(world_point(0)) > cubeSide/2)  ||  // outside of cube bundary
                         (abs(world_point(1)) > cubeSide/2) ||
                         (world_point(2) > cubeSide) ||
-                        (world_point(2) < 0.0f))
+                        (world_point(2) < -0.03f))
                     {
                         continue;
                     }
@@ -232,7 +232,7 @@ int main(int argc, char** argv)
         cloud_scene->height = 1;
         cloud_scene->width  = cloud_scene->points.size();
         cloud_scene->resize ( cloud_scene->height * cloud_scene->width );
-        extractPlaneFeatureFromCloud(cloud_scene, cloud_scene);
+
 
         // ##  VERY TIME CONSUMING !!! 
         // pcl::StatisticalOutlierRemoval<pcl::PointXYZRGBA> sor;
@@ -250,6 +250,8 @@ int main(int argc, char** argv)
         viewer.addPointCloud ( cloud_scene, "cloud_scene" );
         viewer.addCoordinateSystem ( 1.0 );
         viewer.spinOnce();
+
+        extractPlaneFeatureFromCloud(cloud_scene, cloud_scene);
 
        if( kbhit())   //space down
        {
