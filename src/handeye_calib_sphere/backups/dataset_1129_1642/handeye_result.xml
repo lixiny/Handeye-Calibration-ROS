@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<opencv_storage>
+<handeyeResult type_id="opencv-matrix">
+  <rows>1</rows>
+  <cols>7</cols>
+  <dt>d</dt>
+  <data>
+    3.1814147601483253e-02 1.9543778482464060e-02
+    -1.1427433969650705e-01 -9.2366262570278379e-01
+    3.8253477791842438e-01 2.2411994229702484e-02 3.4928610395098449e-03</data></handeyeResult>
+</opencv_storage>

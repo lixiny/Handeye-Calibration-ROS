@@ -16,6 +16,13 @@ else()
     message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
 
+
+find_package(OpenMP REQUIRED)
+if(OPENMP_FOUND)
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+endif()
+
 # 添加cmake模块以使用ceres库
 list( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules/ )
 
@@ -42,9 +49,6 @@ find_package(OpenCV 3 REQUIRED )
 find_package(PCL 1.7 REQUIRED)
 find_package(Sophus REQUIRED)
 find_package(Ceres REQUIRED )
-
-
-
 
 
 # Generate added messages and services with any dependencies listed here
@@ -87,13 +91,14 @@ link_directories(${OpenCV_LIBRARY_DIR})
 link_directories(${PCL_LIBRARY_DIRS})
 
 
-add_definitions(${PCL_DEFINITIONS})
+#add_definitions(${PCL_DEFINITIONS})
 
 
 add_executable(grab_data_node
     src/grab_data_node.cpp
     src/CalibrationTool.cpp
     src/ArucoPlane.cpp)
+
 add_dependencies(grab_data_node rgbd_srv_gencpp)
 
 
@@ -116,15 +121,64 @@ target_link_libraries(eyeinhand_calib_node
 	${CERES_LIBRARIES}
 	${Sophus_LIBRARIES}
 	)
-	
-#add_executable(cam_transform_publisher
-#        src/cam_transform_publisher.cpp)
-#        
-#target_link_libraries(cam_transform_publisher
-#	${catkin_LIBRARIES}
-#	${OpenCV_LIBS}
-#	)
 
+
+add_executable(grab_tf_node
+    src/grab_tf_node.cpp)
+
+target_link_libraries(grab_tf_node
+    ${catkin_LIBRARIES}
+    ${OpenCV_LIBS}
+    )
+
+
+
+
+################### test node ######################
+	
+add_executable(generate_fake_data
+    test/generate_fake_data.cpp)
+
+target_link_libraries(generate_fake_data
+    ${catkin_LIBRARIES}
+    ${OpenCV_LIBS}
+    ${Sophus_LIBRARIES}
+        ${CERES_LIBRARIES}
+    )
+
+
+add_executable(generate_fake_data_v2
+    test/generate_fake_data_v2.cpp)
+
+target_link_libraries(generate_fake_data_v2
+    ${catkin_LIBRARIES}
+    ${OpenCV_LIBS}
+    ${Sophus_LIBRARIES}
+        ${CERES_LIBRARIES}
+    )
+
+add_executable(generate_fake_data_v3
+    test/generate_fake_data_v3.cpp)
+
+target_link_libraries(generate_fake_data_v3
+    ${catkin_LIBRARIES}
+    ${OpenCV_LIBS}
+    ${Sophus_LIBRARIES}
+        ${CERES_LIBRARIES}
+    )
+
+
+add_executable(fit_sphere
+    test/fit_sphere.cpp
+    src/CalibrationTool.cpp)
+
+target_link_libraries(fit_sphere
+    ${catkin_LIBRARIES}
+    ${OpenCV_LIBS}
+    ${Sophus_LIBRARIES}
+    ${CERES_LIBRARIES}
+    ${PCL_LIBRARIES}
+    )
 
 
 ############### validation node ###################

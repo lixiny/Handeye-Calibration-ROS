@@ -10,9 +10,42 @@ rosrun tf static_transform_publisher -0.0335834918597  0.0434926399527  0.053427
 
 
 ### sda realsense 棋盘格结果
-rosrun tf static_transform_publisher -0.0426610901036  0.0435682041765  0.0628709556475  -0.0213248179092  0.00884362796331  -0.893675406915  0.44811974902  /arm_left_link_tool0  /camera_link  100
+rosrun tf static_transform_publisher -0.0426610901036  0.0435682041765  0.0628709556475  -0.0213248179092  0.00884362796331  -0.893675406915  0.44811974902  /arm_left_link_7_t  /camera_link  100
 
 
-rosrun tf static_transform_publisher -0.0340347  0.0412841  0.0568137  0.44812 0.0213248 -0.00884363 0.893675   /arm_left_link_tool0  /camera_link  100
+rosrun tf static_transform_publisher -0.0426828   0.235725 -0.0978325  0.187695 0.0783895  0.941518 -0.268643  /ee_link  /camera_link_init  100
 
--0.0340347  0.0412841  0.0568137  0.0213248 -0.00884363 0.893675 0.44812
+rosrun tf static_transform_publisher -0.0426611  0.0435682   0.062871  -0.0213248 0.00884363  -0.893675  0.44812  /ee_link  /camera_link_real  100
+
+rosrun tf static_transform_publisher -0.0304635  0.0475711   0.054394   0.0300239 -0.0127548   0.894188  -0.446501  /ee_link  /camera_link_estm  100
+
+
+
+rosrun tf static_transform_publisher -0.0186507  0.0591168  -0.111602  0.8994 -0.434787 -0.00607273  0.0447631  /arm_left_link_7_t  /camera_link  100
+
+
+### 一个比较好的结果 ！ sda 左手 realsense
+rosrun tf static_transform_publisher 0.0326057 0.0489429 -0.096547  0.915898 -0.401228 -0.0089824  0.00811652  /arm_left_link_7_t  /camera_link_init  100
+
+
+rosrun tf static_transform_publisher 0.0129164 0.0592691 -0.095395  0.915898 -0.401228 -0.0089824  0.00811652  /arm_left_link_7_t  /camera_link  100
+
+
+
+rosrun tf static_transform_publisher 0.0451967 0.0772374 -0.131036  0.93226 -0.361373 -0.0148584   0.0089221   /arm_left_link_7_t  /camera_link  100
+
+
+rosrun tf static_transform_publisher 0.0318238 0.0195634 -0.114277    0.923665   -0.382528  -0.0224135 -0.00346806   /arm_left_link_7_t  /camera_link  100
+
+
+rosrun tf static_transform_publisher -0.0426611  0.0435682   0.062871 -0.0213248 0.00884363  -0.893675    0.44812   /arm_left_link_7_t  /camera_link  100
+
+#### UR AGV
+
+rosrun tf static_transform_publisher 0.136992   0.126648 -0.0243686 0.705211 0.120917 0.681835 -0.152178   /ee_link  /camera_link  100
+
+
+rosrun tf static_transform_publisher 0.178335 0.0875736 0.0458743  0.732456  0.141373  0.645989 -0.161927   /ee_link  /camera_link  100
+
+
+

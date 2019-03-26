@@ -62,6 +62,7 @@
 #include <fcntl.h>
 #include <chrono>
 #include <memory>
+#include <dirent.h>
 
 // ros
 #include <ros/ros.h>

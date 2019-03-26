@@ -15,7 +15,7 @@ enum {DETECTION = 0, CAPTURING = 1, CALIBRATION =2};
 struct Extrinsic_Parameter
 {
 	Mat transform;
-  Mat Rv;
+    Mat Rv;
 	Mat t;
 };
 
@@ -48,7 +48,11 @@ void saveStampedImgPointcloud( const pcl::PointCloud<pcl::PointXYZRGBA>::Ptr& cl
                                const int& counter,
                                const string& dataOutputDir );
                                
-void deprojectPixelToPoint(Eigen::Vector3f& point, int pixel_coloum, int pixel_row, float depth, cv::Mat& cameraMatrix, cv::Mat& distCoeffs);                               
+void deprojectPixelToPoint(Eigen::Vector3f& point, int pixel_coloum, int pixel_row, float depth, cv::Mat& cameraMatrix, cv::Mat& distCoeffs);
+
+void generateSphereFragment(pcl::PointCloud<pcl::PointXYZRGBA>::Ptr model, Eigen::Vector3f& center, float r, bool fragment = true);
+
+vector<string> getFilesInDirectory ( const string& cate_dir, const string suffix);
                                                               
 }
 #endif // CALIBRATION_TOOL_H

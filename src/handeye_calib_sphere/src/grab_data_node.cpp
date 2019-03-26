@@ -8,6 +8,8 @@ using namespace cv;
 
 #define KEYCODE_SPACE   0x20
 #define KEYCODE_ESC     0x1B
+#define KEYCODE_s       0x73
+#define KEYCODE_S       0x53
 
 string  robotPoseOutput;
 string  cameraIntrinsicInput;
@@ -22,21 +24,13 @@ int     numOfQRcodeOnSide;
 Mat cameraMatrix;
 Mat distCoeffs;
 
-enum class USAGE
-{
-    STANDALONE                          ,  /** basic usage: only grab images and pointclouds */
-    WITH_QR_EXTRACTOR                   ,  /** grab images and pointclouds extracted from the region inside the cuboid */
-    WITH_ROBOT_TF_POSE                  ,  /** grab images, pointclouds and synchronizd tf transformation between two coordinates*/
-    WITH_QR_EXTRACTOR_AND_ROBOT_TF_POSE ,  /** advanced usage: grab images, extracted pointclouds and synchronized tf */
-    USAGE_COUNT
-} usage ;
 
 // ################################### function prototype ############################################
 
 int kbhit(void);
 int getch();
 void extractPlaneFeatureFromCloud(pcl::PointCloud<pcl::PointXYZRGBA>::Ptr& cloud_source,
-  									pcl::PointCloud<pcl::PointXYZRGBA>::Ptr& cloud_destin);
+                                  pcl::PointCloud<pcl::PointXYZRGBA>::Ptr& cloud_destin);
 
 // ################################### main function ###########################################
 int main(int argc, char** argv)
@@ -48,13 +42,13 @@ int main(int argc, char** argv)
 
     nh.param("useQrExtractor", useQrExtractor, false);
     nh.param("recordingTF", recordingTF, false);
-    nh.param("robotPoseOutput" , robotPoseOutput, std::string("./robot_pose.xml"));
     nh.param("cameraIntrinsicInput", cameraIntrinsicInput, std::string("./camera_intrinsic_color.xml"));
     nh.param("numOfQRcodeOnSide", numOfQRcodeOnSide, 0);
     nh.param("EETF", EETFname, std::string("/ee_link"));
     nh.param("baseTF", baseTFname, std::string("/base_link"));
     nh.param("RGBDserviceName",  RGBDserviceName,  std::string("realsense2_server"));
     nh.param("dataOutputDir", dataOutputDir, std::string("./dataset") );
+    nh.param("robotPoseOutput" , robotPoseOutput, std::string("./dataset/robot_pose.xml"));
 
     cout << "robotPoseOutput " << robotPoseOutput << endl;
     cout << "dataOutputDir " << dataOutputDir << endl;
@@ -75,7 +69,7 @@ int main(int argc, char** argv)
     }
 
     cout << "\n Init Complete ! \n" << endl;
-    int fileSavedCounter = 1;
+    int fileSavedCounter = 0;
 
     Mat rgb_image, rgb_temp;
     Mat depth_image;
@@ -100,7 +94,7 @@ int main(int argc, char** argv)
     bool  validAruco = false;
     int key = 0;
 
-    if( useQrExtractor ) 
+    if( useQrExtractor )
     {
         auto pArucoPlaneTemp =  make_shared<handeye::ArucoPlane>(numOfQRcodeOnSide);
         pArucoPlane = pArucoPlaneTemp;
@@ -146,7 +140,7 @@ int main(int argc, char** argv)
             try
             {
                 /** get the latest tfTransform from robot_base_link(source) to robot_end_link(target) */
-                tfListener.lookupTransform ( EETFname, baseTFname, ros::Time ( 0 ), tfTransform );
+                tfListener.lookupTransform ( baseTFname, EETFname, ros::Time ( 0 ), tfTransform );
 
             } catch ( tf::TransformException ex ) {
                 ROS_ERROR("%s", ex.what());
@@ -159,7 +153,7 @@ int main(int argc, char** argv)
         Eigen::Matrix4f transform, transform_inv;
 
         chrono::steady_clock::time_point t3 = chrono::steady_clock::now();
-        if ( useQrExtractor ) 
+        if ( useQrExtractor )
         {
             validAruco = pArucoPlane->calculateExtrinsicFromImage( rgb_image ) ;
             if ( validAruco ) {
@@ -172,7 +166,7 @@ int main(int argc, char** argv)
         }
 
         vector<pcl::PointXYZRGBA, Eigen::aligned_allocator<pcl::PointXYZRGBA>>().swap(cloud_scene->points);
-    	cloud_scene->clear();
+        cloud_scene->clear();
 
 
         imshow("color", rgb_temp);
@@ -185,7 +179,9 @@ int main(int argc, char** argv)
             for (int c=0;c<depth_image.cols;c++)
             {
                 pcl::PointXYZRGBA p;
-                if ( ! ( depth_image.ptr<float> ( r ) [c] > 0 ) || depth_image.ptr<float> ( r ) [c] > 2.0 ) {
+                if ( ! ( depth_image.ptr<float> ( r ) [c] > 0 )
+                     || depth_image.ptr<float> ( r ) [c] > 2.0 )
+                {
                     continue;   // unwanted depth at current point
                 }
 
@@ -193,10 +189,10 @@ int main(int argc, char** argv)
                 float depth_in_meter = float ( depth_image.ptr<float> ( r ) [c] );
 
                 calibtool::deprojectPixelToPoint(scenePoint,
-                                                   c, r,
-                                                   depth_in_meter,
-                                                   cameraMatrix,
-                                                   distCoeffs );
+                                                 c, r,
+                                                 depth_in_meter,
+                                                 cameraMatrix,
+                                                 distCoeffs );
 
                 if ( useQrExtractor && validAruco) {
                     Eigen::Vector4f scene_point;
@@ -205,9 +201,9 @@ int main(int argc, char** argv)
                     world_point = transform_inv * scene_point;
 
                     if( (abs(world_point(0)) > cubeSide/2)  ||  // outside of cube bundary
-                        (abs(world_point(1)) > cubeSide/2) ||
-                        (world_point(2) > cubeSide) ||
-                        (world_point(2) < -0.03f))
+                            (abs(world_point(1)) > cubeSide/2) ||
+                            (world_point(2) > cubeSide) ||
+                            (world_point(2) < 0.03f))
                     {
                         continue;
                     }
@@ -229,12 +225,7 @@ int main(int argc, char** argv)
             }
         }
 
-        cloud_scene->height = 1;
-        cloud_scene->width  = cloud_scene->points.size();
-        cloud_scene->resize ( cloud_scene->height * cloud_scene->width );
-
-
-        // ##  VERY TIME CONSUMING !!! 
+        // ##  VERY TIME CONSUMING !!!
         // pcl::StatisticalOutlierRemoval<pcl::PointXYZRGBA> sor;
         // sor.setInputCloud(cloud_scene);
         // sor.setMeanK(50);   // mean value
@@ -253,33 +244,36 @@ int main(int argc, char** argv)
 
         extractPlaneFeatureFromCloud(cloud_scene, cloud_scene);
 
-       if( kbhit())   //space down
-       {
-           char c = getchar();
-           if(c == KEYCODE_ESC)
-           {
-               cout<<"\n Finishing grab data ..."<<endl;
-               viewer.close();
+        if( kbhit())   //space down
+        {
+            char c = getchar();
+            if(c == KEYCODE_ESC)
+            {
+                cout<<"\n Finishing grab data ..."<<endl;
+                viewer.close();
                 
-               ros::shutdown();
-               break;
-           } else {
+                ros::shutdown();
+                break;
+            } else if (c == KEYCODE_s || c == KEYCODE_S ) {
                 
-               cout<<"saving data..." << endl;
-               if (recordingTF) {
-                   calibtool::saveStampedImgPointcloudTFPose(cloud_scene,
-                       rgb_temp, tfTransform, fileSavedCounter, robotPoseOutput, dataOutputDir);
-               
-               } else {
-                   calibtool::saveStampedImgPointcloud(cloud_scene, rgb_temp, fileSavedCounter, dataOutputDir);
-               }
+                cout<<"...... saving data ...... #" << fileSavedCounter << endl;
+                cloud_scene->height = 1;
+                cloud_scene->width  = cloud_scene->points.size();
+                cloud_scene->resize ( cloud_scene->height * cloud_scene->width );
+                if (recordingTF) {
+                    calibtool::saveStampedImgPointcloudTFPose(cloud_scene,
+                                                              rgb_temp, tfTransform, fileSavedCounter, robotPoseOutput, dataOutputDir);
 
-               fileSavedCounter++;
-           }
+                } else {
+                    calibtool::saveStampedImgPointcloud(cloud_scene, rgb_temp, fileSavedCounter, dataOutputDir);
+                }
 
-       }
+                fileSavedCounter++;
+            }
 
-       loop_rate.sleep();
+        }
+
+        loop_rate.sleep();
         // ros::spinOnce();
         
     }
@@ -299,7 +293,7 @@ int main(int argc, char** argv)
  */
 
 void extractPlaneFeatureFromCloud(pcl::PointCloud<pcl::PointXYZRGBA>::Ptr& cloud_source,
-  pcl::PointCloud<pcl::PointXYZRGBA>::Ptr& cloud_destin)
+                                  pcl::PointCloud<pcl::PointXYZRGBA>::Ptr& cloud_destin)
 {
     // creat the filtering object
     pcl::ModelCoefficients::Ptr coefficient(new pcl::ModelCoefficients());

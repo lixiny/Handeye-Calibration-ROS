@@ -1,0 +1,1 @@
+rosrun tf static_transform_publisher 0.136992   0.126648 -0.0243686 0.705211 0.120917 0.681835 -0.152178   /ee_link  /camera_link  100

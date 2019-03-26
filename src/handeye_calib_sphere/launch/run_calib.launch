@@ -1,0 +1,25 @@
+<launch>
+  <!-- TF names-->
+
+
+  <arg name="dataInputDir"  default="$(find handeye_calib_sphere)/dataset" />
+
+
+  <arg name="handeyeInitFileName"   default="handeye_init.xml" />
+  <arg name="handeyeResultFileName"     default="handeye_result.xml" />
+  <arg name="robotPoseFileName"         default="robot_pose.xml" />
+  
+  <node pkg="handeye_calib_sphere" type="eyeinhand_calib_node" name="eyeinhand_calib_node" output="screen">
+  <!-- handeye_calib_camodocal arg pass -->
+      <param name="dataInputDir"         type="str"  value="$(arg dataInputDir)" />
+      <param name="handeyeInitFile"      type="str"  value="$(arg dataInputDir)/$(arg handeyeInitFileName)" />
+      <param name="handeyeResultFile"    type="str"  value="$(arg dataInputDir)/$(arg handeyeResultFileName)" />
+      <param name="robotPoseInput"         type="str"  value="$(arg dataInputDir)/$(arg robotPoseFileName)" />
+      <param name="sphereModelRadius"    type="double" value="0.075" />
+
+
+
+      
+  </node>
+
+</launch>
