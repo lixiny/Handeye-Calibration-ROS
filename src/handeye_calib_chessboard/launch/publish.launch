@@ -1,7 +1,0 @@
-<launch>
-
-  <node pkg="tf" type="static_transform_publisher" name="cam_link" args="0.076175 0.00865052  -0.074926 0.00130272 0.569234 0.00233316 0.822171 /camera_link_r   /camera_link_l     100"/>
-
-</launch>
-
-

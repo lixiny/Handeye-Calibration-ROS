@@ -91,35 +91,16 @@ include_directories(
 
 link_directories(${OpenCV_LIBRARY_DIR})
 
-add_executable(camera_transform_publisher_l
-    src/camera_transform_publisher_l.cpp)
+add_executable(camera_transform_publisher
+    src/camera_transform_publisher.cpp)
 
 
-target_link_libraries(camera_transform_publisher_l
+target_link_libraries(camera_transform_publisher
     ${catkin_LIBRARIES}
     ${OpenCV_LIBS}
     ${EIGEN3_LIBS}
     )
 
-add_executable(camera_transform_publisher_r
-    src/camera_transform_publisher_r.cpp)
-
-
-target_link_libraries(camera_transform_publisher_r
-    ${catkin_LIBRARIES}
-    ${OpenCV_LIBS}
-    ${EIGEN3_LIBS}
-    )
-
-add_executable(generate_chessboard
-    src/generate_chessboard.cpp)
-
-
-target_link_libraries(generate_chessboard
-    ${catkin_LIBRARIES}
-    ${OpenCV_LIBS}
-    ${EIGEN3_LIBS}
-    )
 
 
 # all install targets should use catkin DESTINATION variables

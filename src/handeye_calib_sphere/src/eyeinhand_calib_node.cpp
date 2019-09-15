@@ -212,7 +212,6 @@ int main(int argc, char** argv )
         Eigen::Vector3d sphereCenter(sphereModel(0), sphereModel(1), sphereModel(2));
         vSphereCenterInCamera.push_back(sphereCenter);
         cout << "."; cout.flush();
-        //        cout << " after ICP: (" << sphereCenter.transpose() << ")" << endl;
     }
 
     cout << "Complete" << "\n\n";
