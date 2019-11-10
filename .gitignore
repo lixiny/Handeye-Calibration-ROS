@@ -49,4 +49,5 @@ cmake-build-debug
 CMakeLists.txt.user
 src/handeye_calib_sphere/test/*
 src/handeye_calib_sphere/dataset/*
+!src/handeye_calib_sphere/dataset/*.xml
 src/handeye_calib_sphere/matlab_ws/
