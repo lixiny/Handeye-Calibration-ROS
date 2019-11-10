@@ -1,0 +1,18 @@
+<launch>
+
+
+  <arg name="cameraIntrinsicInput"  default="$(find camera_transform_publisher)/camera_intrinsic_color_kinect.xml" />
+  <arg name="cameraTopic"  default="/kinect/rgb" />
+  <arg name="cameraLink"  default="/camera_link" />
+  <arg name="arMarkerName"  default="/ar_marker_0" />
+
+  <node pkg="camera_transform_publisher" type="camera_transform_publisher" name="camera_transform_publisher" output="screen">
+  <!-- handeye_calib_camodocal arg pass -->
+      <param name="cameraIntrinsicInput" type="str"  value="$(arg cameraIntrinsicInput)" />
+      <param name="cameraTopic" type="str"  value="$(arg cameraTopic)" />
+      <param name="chessboardWidth"       type="int" value="8"/>
+      <param name="chessboardHeight"      type="int" value="7"/>
+      <param name="squareSize"    type="double"  value="0.025" />
+  </node>
+
+</launch>

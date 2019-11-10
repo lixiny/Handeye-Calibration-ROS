@@ -1,0 +1,20 @@
+<launch>
+  <!-- TF names-->
+  <arg name="robotPoseOutput"   default="$(find handeye_calib_sphere)/dataset/robot_pose.xml" />
+
+  <!-- End Effector Transform, the ros topic for the tf frame
+       at the tip of your robot's gripper or other tool -->
+  <arg name="EETF"              default="/arm_left_link_tool0" />
+
+  <!-- Robot Base Transform, the ros topic for the base tf frame of your robot -->
+  <arg name="baseTF"            default="/base_link" />
+
+
+  <node pkg="handeye_calib_sphere" type="grab_tf_node" name="grab_tf_node" output="screen">
+  <!-- handeye_calib_camodocal arg pass -->
+      <param name="robotPoseOutput"      type="str"  value="$(arg robotPoseOutput)" />
+      <param name="EETF"                 type="str"  value="$(arg EETF)" />
+      <param name="baseTF"               type="str"  value="$(arg baseTF)" />
+  </node>
+
+</launch>
