@@ -13,34 +13,18 @@ class ArucoPlane
 {
 public:
     
-    //    typedef shared_ptr<ArucoPlane::QR> QRPtr;
-
     ArucoPlane ();
     ArucoPlane (int numOfQRcodeOnSide) :
         _numOfQRcodeOnSide ( numOfQRcodeOnSide )
     {
 
-        if (_numOfQRcodeOnSide == 10) {
-            TEN_x_TEN _tenxten;
-            _qr = _tenxten;
-        } else if (_numOfQRcodeOnSide == 6) {
+        if (_numOfQRcodeOnSide == 6) {
             SIX_x_SIX _sixxsix;
             _qr = _sixxsix;
         }
 
         notification();
 
-        /**
-        shared_ptr<QR> qr(new QR());
-        _qr = qr;
-        if (_numOfQRcodeOnSide == 10) {
-            shared_ptr<TEN_x_TEN> _tenxten( new TEN_x_TEN() );
-            _qr = _tenxten;
-        } else if (_numOfQRcodeOnSide == 6) {
-            shared_ptr<SIX_x_SIX> _sixxsix( new SIX_x_SIX() );
-            _qr = _sixxsix;
-        }
-        */
     }
 
     /** Member Variables */
@@ -107,153 +91,6 @@ private:
                                Eigen::Matrix4d& transform);
 
     void notification();
-
-    class TEN_x_TEN : public QR
-    {
-    public:
-        TEN_x_TEN()
-        {
-            QR_TAG_SIZE = __QR_TAG_SIZE;
-            half        = __half;
-            length1     = __length1;
-            length2     = __length2;
-            length3     = __length3;
-            length4     = __length4;
-            length5     = __length5;
-            cubeSide    = __cubeSide;
-            cubeHeight  = __cubeHeight;
-
-            for(int i = 0; i < 100; i++) {
-                basePositions.push_back(__basePositions[i]);
-            }
-
-            for(int j = 0; j < 8; j++) {
-                cubeVertexInWorld.push_back(__cubeVertexInWorld[j]);
-            }
-        }
-    private:
-        float __QR_TAG_SIZE = 0.053; //meter
-        float __half = 0.053/2.0;
-        float __length1 = 0.26775;
-        float __length2 = 0.20825;
-        float __length3 = 0.14875;
-        float __length4 = 0.08925;
-        float __length5 = 0.02975;
-        float __cubeSide = 0.36;
-        float __cubeHeight = 0.36;
-
-        Eigen::Vector3f __basePositions[100] = {{-__length1, __length1, 0}, //0~9
-                                                {-__length2, __length1, 0},
-                                                {-__length3, __length1, 0},
-                                                {-__length4, __length1, 0},
-                                                {-__length5, __length1, 0},
-                                                {__length5, __length1, 0},
-                                                {__length4, __length1, 0},
-                                                {__length3, __length1, 0},
-                                                {__length2, __length1, 0},
-                                                {__length1, __length1, 0},
-                                                {-__length1, __length2, 0},//10~19
-                                                {-__length2, __length2, 0},
-                                                {-__length3, __length2, 0},
-                                                {-__length4, __length2, 0},
-                                                {-__length5, __length2, 0},
-                                                {__length5, __length2, 0},
-                                                {__length4, __length2, 0},
-                                                {__length3, __length2, 0},
-                                                {__length2, __length2, 0},
-                                                {__length1, __length2, 0},
-                                                {-__length1, __length3, 0},//20~21
-                                                {-__length2, __length3, 0},
-                                                {0, 0, 0},
-                                                {0, 0, 0},
-                                                {0, 0, 0},
-                                                {0, 0, 0},
-                                                {0, 0, 0},
-                                                {0, 0, 0},
-                                                {__length2, __length3, 0},//28~29
-                                                {__length1, __length3, 0},
-                                                {-__length1, __length4, 0},//30~31
-                                                {-__length2, __length4, 0},
-                                                {0, 0, 0},
-                                                {0, 0, 0},
-                                                {0, 0, 0},
-                                                {0, 0, 0},
-                                                {0, 0, 0},
-                                                {0, 0, 0},
-                                                {__length2, __length4, 0},//38~39
-                                                {__length1, __length4, 0},
-                                                {-__length1, __length5, 0},//40~41
-                                                {-__length2, __length5, 0},
-                                                {0, 0, 0},
-                                                {0, 0, 0},
-                                                {0, 0, 0},
-                                                {0, 0, 0},
-                                                {0, 0, 0},
-                                                {0, 0, 0},
-                                                {__length2, __length5, 0},//48~49
-                                                {__length1, __length5, 0},
-                                                {-__length1, -__length5, 0},//50~51
-                                                {-__length2, -__length5, 0},
-                                                {0, 0, 0},
-                                                {0, 0, 0},
-                                                {0, 0, 0},
-                                                {0, 0, 0},
-                                                {0, 0, 0},
-                                                {0, 0, 0},
-                                                {__length2, -__length5, 0},//58~59
-                                                {__length1, -__length5, 0},
-                                                {-__length1, -__length4, 0},//60~61
-                                                {-__length2, -__length4, 0},
-                                                {0, 0, 0},
-                                                {0, 0, 0},
-                                                {0, 0, 0},
-                                                {0, 0, 0},
-                                                {0, 0, 0},
-                                                {0, 0, 0},
-                                                {__length2, -__length4, 0},//68~69
-                                                {__length1, -__length4, 0},
-                                                {-__length1, -__length3, 0},//70~71
-                                                {-__length2, -__length3, 0},
-                                                {0, 0, 0},
-                                                {0, 0, 0},
-                                                {0, 0, 0},
-                                                {0, 0, 0},
-                                                {0, 0, 0},
-                                                {0, 0, 0},
-                                                {__length2, -__length3, 0},//78~79
-                                                {__length1, -__length3, 0},
-                                                {-__length1, -__length2, 0},//80~89
-                                                {-__length2, -__length2, 0},
-                                                {-__length3, -__length2, 0},
-                                                {-__length4, -__length2, 0},
-                                                {-__length5, -__length2, 0},
-                                                {__length5, -__length2, 0},
-                                                {__length4, -__length2, 0},
-                                                {__length3, -__length2, 0},
-                                                {__length2, -__length2, 0},
-                                                {__length1, -__length2, 0},
-                                                {-__length1, -__length1, 0},//90~99
-                                                {-__length2, -__length1, 0},
-                                                {-__length3, -__length1, 0},
-                                                {-__length4, -__length1, 0},
-                                                {-__length5, -__length1, 0},
-                                                {__length5, -__length1, 0},
-                                                {__length4, -__length1, 0},
-                                                {__length3, -__length1, 0},
-                                                {__length2, -__length1, 0},
-                                                {__length1, -__length1, 0}
-                                               };
-
-        Eigen::Vector4f __cubeVertexInWorld[8] = {{-__cubeSide/2, __cubeSide/2, 0, 1},
-                                                  {__cubeSide/2, __cubeSide/2, 0, 1},
-                                                  {__cubeSide/2, -__cubeSide/2, 0, 1},
-                                                  {-__cubeSide/2, -__cubeSide/2, 0, 1},
-                                                  {-__cubeSide/2, __cubeSide/2, __cubeSide, 1},
-                                                  {__cubeSide/2, __cubeSide/2, __cubeSide, 1},
-                                                  {__cubeSide/2, -__cubeSide/2, __cubeSide, 1},
-                                                  {-__cubeSide/2, -__cubeSide/2, __cubeSide, 1}
-                                                 };
-    };
 
     class SIX_x_SIX : public QR
     {

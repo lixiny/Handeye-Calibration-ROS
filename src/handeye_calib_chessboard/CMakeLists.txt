@@ -40,6 +40,8 @@ SET(GFLAGS_LIBRARY ${CMAKE_THREAD_LIBS_INIT})
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
+
+SET(OpenCV_DIR /usr/local/share/OpenCV)
 find_package(OpenCV 3 REQUIRED)
 
 if(OpenCV_FOUND)

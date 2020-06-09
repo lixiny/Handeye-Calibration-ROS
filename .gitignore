@@ -41,8 +41,8 @@ CTestTestfile.cmake
 *.out
 *.app
 
-build/*
-devel/*
+build
+devel
 .idea
 .catkin_workspace
 cmake-build-debug
@@ -51,3 +51,5 @@ src/handeye_calib_sphere/test/*
 src/handeye_calib_sphere/dataset/*
 !src/handeye_calib_sphere/dataset/*.xml
 src/handeye_calib_sphere/matlab_ws/
+build
+.vscode

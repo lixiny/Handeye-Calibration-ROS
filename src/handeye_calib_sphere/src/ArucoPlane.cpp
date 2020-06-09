@@ -18,15 +18,14 @@ void ArucoPlane::setQRnums(int numOfQRcodeOnSide)
 {
     _numOfQRcodeOnSide = numOfQRcodeOnSide;
 
-    if (_numOfQRcodeOnSide == 10)
-    {
-        TEN_x_TEN _tenxten;
-        _qr = _tenxten;
-    }
-    else if (_numOfQRcodeOnSide == 6)
+
+    if (_numOfQRcodeOnSide == 6)
     {
         SIX_x_SIX _sixxsix;
         _qr = _sixxsix;
+    } else {
+        cout << "Unimplemented QR side" << endl;
+        exit(-1);
     }
 }
 
@@ -183,7 +182,7 @@ void ArucoPlane::buildTransformMatrix(const cv::Mat &rvec,
     translation(1, 0) = (double)tvec.at<double>(0, 1);
     translation(2, 0) = (double)tvec.at<double>(0, 2);
 
-    Sophus::SE3 SE3Rt(rotation, translation);
+    Sophus::SE3<double> SE3Rt(rotation, translation);
 
     transform = SE3Rt.matrix();
 }

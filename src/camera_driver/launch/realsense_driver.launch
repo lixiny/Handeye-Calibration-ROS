@@ -1,0 +1,4 @@
+<launch>
+  <node name="realsense2_driver_node" pkg="realsense2_driver" type="realsense2_driver" output="screen" />
+  <node name="realsense2_server_node" pkg="realsense2_driver" type="realsense2_server" />
+</launch>

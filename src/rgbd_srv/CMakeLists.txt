@@ -4,7 +4,6 @@ project(rgbd_srv)
 
 find_package(catkin REQUIRED COMPONENTS
     image_transport
-    cv_bridge
     roscpp
     rospy
     sensor_msgs
@@ -13,7 +12,6 @@ find_package(catkin REQUIRED COMPONENTS
     tf
 )
 find_package(OpenCV 3 REQUIRED )
-find_package(PCL 1.7 REQUIRED)
 
 # Generate services in the 'srv' folder
 add_service_files(
@@ -34,7 +32,8 @@ catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES rgb_depth
 #  CATKIN_DEPENDS roscpp rospy sensor_msgs std_msgs
-  CATKIN_DEPENDS message_runtime
+  CATKIN_DEPENDS 
+  message_runtime
 #  DEPENDS system_lib
 )
 

@@ -125,14 +125,17 @@ public:
 	        cv::resize(rgb, rgbSmallSize, cv::Size(height,width), INTER_LINEAR);
 	        bool chessBoardFound1 = cv::findChessboardCorners(rgbSmallSize, boardSize, pointBuftemp, CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_NORMALIZE_IMAGE);
 	        if ( ! chessBoardFound1 ) {
+                cv::putText(rgb, 
+                    "no chessboard found",
+                    cv::Point(10,10), // Coordinates
+                    cv::FONT_HERSHEY_COMPLEX_SMALL, // Font
+                    1.0, // Scale. 2.0 = 2x bigger
+                    cv::Scalar(0,0,255), // BGR Color
+                    1 // Line Thickness (Optional)
+                ); 
 	            cv::imshow("image", rgb);
 	            cv::waitKey(1);
-                if(statusChange) {
-                     cout <<"\e[1;35m" << "NO Valid CHESSBOARD FOUND" << "\e[0m" << endl;
-                     statusChange = false;
-                }
-
-
+                
 	            transform_b.setOrigin( tf::Vector3(0.0, 0.0, 0.0) );
 	            transform_b.setRotation( tf::Quaternion(0, 0, 0, 1) );
 
@@ -145,38 +148,21 @@ public:
 	        }
         }
         
-
         cv::cvtColor(rgb, gray, COLOR_RGB2GRAY);
         bool chessBoardFound2 = cv::findChessboardCorners(rgb, boardSize,  pointBuf, CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_NORMALIZE_IMAGE);
-        if ( ! chessBoardFound2 ) {
-            cv::imshow("image", rgb);
-            cv::waitKey(1);
-            if(statusChange) {
-                 cout <<"\e[1;35m" << "NO Valid CHESSBOARD FOUND" << "\e[0m" << endl;
-                 statusChange = false;
-            }
-            // cout << "***  No Valid CHESSBOARD FOUND  *** " << endl;
-
-            transform_b.setOrigin( tf::Vector3(0.0, 0.0, 0.0) );
-            transform_b.setRotation( tf::Quaternion(0, 0, 0, 1) );
-
-            br.sendTransform(tf::StampedTransform(transform_b, ros::Time::now(),
-                                                  camera_link,
-                                                  ar_marker
-                                                  ));
-            vector<cv::Point2f>().swap(pointBuf);
-            return;
-        }
-
         cv::cornerSubPix( gray, pointBuf, cv::Size(11,11), cv::Size(-1,-1), cv::TermCriteria(CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 30, 0.1) );
         cv::drawChessboardCorners(rgb, boardSize, Mat(pointBuf), chessBoardFound2);
 
+        cv::putText(rgb, 
+            "valid chessboard found",
+            cv::Point(10,10), // Coordinates
+            cv::FONT_HERSHEY_COMPLEX_SMALL, // Font
+            1.0, // Scale. 2.0 = 2x bigger
+            cv::Scalar(0,255,0), // BGR Color
+            1 // Line Thickness (Optional)
+        ); 
         cv::imshow("image", rgb);
         cv::waitKey(1);
-        if( ! statusChange) {
-             cout <<"\e[1;33m" << "Valid CHESSBOARD FOUND" << "\e[0m" << endl;
-             statusChange = true;
-        }
 
         Mat imagePoints(pointBuf.size(), 2, CV_32F);
         for(int i = 0; i < int(pointBuf.size()); i++) {
@@ -221,21 +207,14 @@ public:
         transfCam2Marker(1,3) = t2;
         transfCam2Marker(2,3) = t3;
         transfCam2Marker(3,3) = 1.0;
-        //        transformFromCamToBoard.at<double>(0,3)=t1;
-        //        transformFromCamToBoard.at<double>(1,3)=t2;
-        //        transformFromCamToBoard.at<double>(2,3)=t3;
-        //        transformFromCamToBoard.at<double>(3,3)=1;
 
         transfCam2Marker(3,0) = 0;
         transfCam2Marker(3,1) = 0;
         transfCam2Marker(3,2) = 0;
-        //        transformFromCamToBoard.at<double>(3,0)=0;
-        //        transformFromCamToBoard.at<double>(3,1)=0;
-        //        transformFromCamToBoard.at<double>(3,2)=0;
+
         for (int i=0;i<3;i++){
             for(int j=0;j<3;j++){
                 transfCam2Marker(i,j) = dcm.at<double>(i,j);
-                // transformFromCamToBoard.at<double>(i,j)=dcm.at<double>(i,j);
             }
         }
 
@@ -260,7 +239,6 @@ public:
                                               ros::Time::now(),
                                               camera_link,
                                               ar_marker
-
                                               ));
     }
 
