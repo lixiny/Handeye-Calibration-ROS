@@ -1,0 +1,16 @@
+<launch>
+
+
+  <arg name="cameraIntrinsicInput"  default="$(find camera_transform_publisher)/camera_intrinsic.xml" />
+  <arg name="cameraTopic"  default="/realsense/rgb" />
+
+  <node pkg="camera_transform_publisher" type="chessboard_publisher" name="chessboard_publisher" output="screen">
+  <!-- handeye_calib_camodocal arg pass -->
+      <param name="cameraIntrinsicInput" type="str"  value="$(arg cameraIntrinsicInput)" />
+      <param name="cameraTopic" type="str"  value="$(arg cameraTopic)" />
+      <param name="chessboardWidth"       type="int" value="10"/>
+      <param name="chessboardHeight"      type="int" value="7"/>
+      <param name="squareSize"    type="double"  value="0.01" />
+  </node>
+
+</launch>

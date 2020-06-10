@@ -1,7 +1,8 @@
 # Robotic Hand-eye Calibration Workspace 
 | **`Ubuntu 1604 & ROS Kinetic Kame`** |  
 
-This repo contains a eye-in-hand calibration tool (Cplusplus & ROS) in **JD京东 GRASPING ROBOT CHALLENGE ([News](http://me.sjtu.edu.cn/news/12692.html))**, and the implements of my paper: **Robotic hand-eye calibration with depth camera: A sphere model approach** (**[PDF](https://ieeexplore.ieee.org/document/8384652/)**)
+This repo contains a eye-in-hand calibration tool (Cplusplus & ROS) in **JD京东 GRASPING ROBOT CHALLENGE ([News](http://me.sjtu.edu.cn/news/12692.html))**,   
+and the implements of my paper: **Robotic hand-eye calibration with depth camera: A sphere model approach** (**[PDF](https://ieeexplore.ieee.org/document/8384652/)**)
 
 Inside `/src` there are 5 ROS packages:    
 
@@ -11,14 +12,14 @@ used by camera_driver.
 drive Intel® RealSense™ RGBD cameras in ROS.   
 (convert raw stream to ros `sensor_msgs::Image`)  
 * **camera_transform_publisher**   
-publish the transformation matrix (extrinsics) between camera and a chessboard. 
-* **handeye_calib_chessboard**  
-handeye calib tools that use RGB camera and chessboard, forked from [link](https://github.com/jhu-lcsr/handeye_calib_camodocal.git)   
+publish the transformation matrix (extrinsics) between camera and a marker( chessboard | aruco tag). 
+* **handeye_calib_marker**  
+handeye calib tools that use RGB camera and a marker, modified on [link](https://github.com/jhu-lcsr/handeye_calib_camodocal.git)   
 **----------------------------------------------**   
-with the package above you can calibrate the hand-eye transformation based on RGB images.   
+with the package above you can calibrate the eye-in-hand transformation on RGB images.   
 
 * **handeye_calib_sphere**  
-fine-tune the handeye result based on depth.  
+fine-tune the eye-in-hand result based on depth.  
 
 
 ## Prerequisit
@@ -62,10 +63,41 @@ sudo make install
 ```
 
 ### Install librealsene (if you use Intel® RealSense™ RGBD Camera)
-We use SR300/D415 camera and use `camera_driver` package to convert raw RGBD images into ROS topic: `sensor_msgs::Image`. The `librealsense` is required only if you use cameras from RealSense family, otherwise make your own `camera_driver` in order to use other cameras.
+We use SR300/D415 camera and use `camera_driver` package to convert raw RGBD images into ROS topic: `sensor_msgs::Image`. The `librealsense` is required only if you use cameras from RealSense family, otherwise make your own `camera_driver`.
 
 Following the librealsense installation guide at [here](https://github.com/IntelRealSense/librealsense/blob/master/doc/distribution_linux.md).  
-We installed: `librealsense2-dkms librealsense2-utils librealsense2-dev librealsense2-dbg`
+We installed: `librealsense2-dkms librealsense2-utils librealsense2-dev librealsense2-dbg` 
+
+### Install cv_bridge from source.
+
+If you are lucky enough, the ros pre-build `ros-melodic-cv-bridge` works well.   
+However, since the default OpenCV in `ros-melodic-cv-bridge` is `3.2`, while we use  opencv & opencv_contrib in `3.4.0`, we recommend you to build the cv_bridge from source.
+
+```
+git clone https://github.com/ros-perception/vision_opencv.git
+cd vision_opencv
+git checkout melodic
+cd cv_bridge
+
+mkdir build && cd build
+cmake ..
+make -j5
+sudo make install
+``` 
+
+In the meantime, remove the pre-bulid `cv_bridge` in ros-melodic path `/opt/ros/melodic`:  
+```
+cd /opt/ros/melodic
+
+# (or you can move it to other place)
+sudo rm -rf lib/libcv_bridge.so
+sudo rm -rf include/cv_bridge
+sudo rm -rf share/cv_bridge
+```  
+
+For more informations about `cv_bridge`, see [here](http://wiki.ros.org/cv_bridge).
+
+
 
 ## Build 
 ```
@@ -74,7 +106,7 @@ cd Handeye-Calibration-ROS
 catkin_make
 ```  
 
-if you only want to calibrate hand-eye transformation based on RGB input, 
+if you only want to calibrate hand-eye transformation on RGB, 
 ```
 git clone https://github.com/lixiny/Handeye-Calibration-ROS.git  
 cd Handeye-Calibration-ROS  
@@ -83,14 +115,61 @@ catkin_make
 ```    
 
 
-## Ready to Use
-example on RealSense D415.
+## Ready to Use (Example on RealSense D415 & UR5)
 
-1. pluged in 
+### 0. Robot and camera setup. 
+
+<img src="doc/setup.png" height=300> <img src="doc/setup2.jpg" height=300>
 
 
 
+cd into the `Handeye-Calibration-ROS/` folder,
+### 1. Pluged in D415 camera, run:   
+```
+roslaunch camera_driver realsense_driver.launch
+```  
+The camera intrinsic will appear in current terminal, record it (later we call it `CamIntr`).     
+<img src="doc/camera_info.png" >    
 
+The `camera_driver` publishes 3 topics to rosmaster: 
+* /realsense/rgb
+* /realsense/depth
+* /realsense/cloud  
+
+You can also visualize the topic in `rviz`. 
+
+### 2. Prepare a marker.
+You can either use a chessboard or an aruco plane (`doc/aruco_plane.jpg`) we designed.   
+
+### 3. Publish a transformation between camera and marker.   
+
+[**IMPORTANT**] Make sure that you have put the `CamIntr` in file: `camera_transform_publisher/camera_intrinsic.xml`.  
+
+#### :smile: Chessboard 
+After you placed the chessboard inside camera view, run: 
+```
+roslaunch camera_transform_publisher chessboard_publisher_realsense.launch
+``` 
+[**IMPORTANT**] There are three user-specified parameters in `chessboard_publisher_realsense.launch`: 
+* chessboardWidth -- # of inner corners on chessboard width direction
+* chessboardHeight -- # of inner corners on chessboard height direction
+* squareSize -- length of side of each square on chessboard, in meter.    
+
+Make sure you have already modified them based on your chessboard. 
+
+#### :grin: Aruco Plane
+After you placed our aruco plane inside camera view, run: 
+```
+roslaunch camera_transform_publisher aruco_publisher_realsense.launch
+``` 
+[**IMPORTANT**] There are two user-specified parameters in `aruco_publisher_realsense.launch`: 
+* tagSideLen -- side length of a single aruco tag, in meter. (see illustration)
+* planeSideLen -- side length of the whole aruco plane, in meter.(see illustration)
+
+Make sure you have already modified them based on the physical length of your aruco plane.
+
+Now in the pop-up window, you will see an AR cube. you can also visualize `tf`(camera_link, ar_marker)  in `rviz`   
+<img src="doc/ar_cube.png" height="320"> <img src="doc/aruco_tf_demo.png" height="320">    
 
 
 

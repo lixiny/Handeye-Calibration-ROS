@@ -1,24 +1,23 @@
-#include "ArucoPlane.h"
+#include "aruco_plane.h"
 
 using namespace std;
 using namespace cv;
 
-namespace handeye
+namespace campub
 {
 
-ArucoPlane::ArucoPlane(float tag_len, float plane_len)
+ArucoPlane::ArucoPlane(float tagLen, float planeLen)
 {
-    TAG_SIDE_LEN = tag_len;
-    PLANE_SIDE_LEN = plane_len;
-    GAP_LEN = (plane_len - 6.0 * tag_len) / 5.0;
+    TAG_SIDE_LEN = tagLen;
+    PLANE_SIDE_LEN = planeLen;
+    GAP_LEN = (planeLen - 6.0 * tagLen) / 5.0;
+    len1 = PLANE_SIDE_LEN / 2.0 - TAG_SIDE_LEN / 2.0;
+    len2 = len1 - (TAG_SIDE_LEN + GAP_LEN);
+    len3 = len2 - (TAG_SIDE_LEN + GAP_LEN);
 
-    len1 = 0.1075;
-    len2 = 0.0645;
-    len3 = 0.0215;
-
-    // len1 = PLANE_SIDE_LEN / 2.0;
-    // len2 = len1 - (TAG_SIDE_LEN + GAP_LEN);
-    // len3 = len2 - (TAG_SIDE_LEN + GAP_LEN);
+    // len1 = 0.1075;
+    // len2 = 0.0645;
+    // len3 = 0.0215;
 
     tagPositions = {
         { -len1, len1, 0}, //0
@@ -88,7 +87,6 @@ void ArucoPlane::setCameraIntrinsic(cv::Mat &cameraMatrix,
 
 bool ArucoPlane::calculateExtrinsicFromImage(cv::Mat &_colorImg)
 {
-
     vector<int> markerIds;
     vector<vector<cv::Point2f>> markerCorners, markerRejected;
     cv::Ptr<cv::aruco::DetectorParameters> detectorParams = cv::aruco::DetectorParameters::create();
@@ -156,7 +154,7 @@ void ArucoPlane::drawingCube(cv::Mat &_tempImg)
     Point2f cubeVertexInImage[8];
     for (int k = 0; k < 8; k++)
     {
-        KTP[k] = _cameraIntrinsic * _transform.cast<float>() * _qr.cubeVertexInWorld[k];
+        KTP[k] = _cameraIntrinsic * _transform.cast<float>() * cubeVertexInWorld[k];
         cubeVertexInImage[k].x = KTP[k](0) / KTP[k](2); // u
         cubeVertexInImage[k].y = KTP[k](1) / KTP[k](2); // v
     }
@@ -176,8 +174,6 @@ void ArucoPlane::drawingCube(cv::Mat &_tempImg)
     cv::line(_tempImg, cubeVertexInImage[2], cubeVertexInImage[6], Scalar(255, 255, 0), 3);
     cv::line(_tempImg, cubeVertexInImage[3], cubeVertexInImage[7], Scalar(255, 255, 0), 3);
 }
-
-/** private: */
 
 void ArucoPlane::buildTransformMatrix(const cv::Mat &rvec,
                                       const cv::Mat &tvec,

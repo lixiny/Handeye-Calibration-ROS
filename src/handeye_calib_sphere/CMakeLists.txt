@@ -26,8 +26,8 @@ add_definitions(${PCL_DEFINITIONS})
 SET(OpenCV_DIR /usr/local/share/OpenCV)
 find_package(OpenCV 3 REQUIRED)
 # # cv_bridge
-# SET(cv_bridge_DIR /usr/local/share/cv_bridge)
-# find_package(cv_bridge REQUIRED )
+SET(cv_bridge_DIR /usr/local/share/cv_bridge)
+find_package(cv_bridge REQUIRED )
 # ceres-solver
 find_package(Ceres REQUIRED )
 # sophus

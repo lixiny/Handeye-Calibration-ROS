@@ -1,20 +1,53 @@
 #ifndef ARUCOPLANE_H
 #define ARUCOPLANE_H
 
-#include "CommonInclude.h"
+#include <opencv2/opencv.hpp>
+#include <opencv2/aruco.hpp>
+#include <opencv2/core.hpp>
+#include <opencv2/calib3d.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/highgui.hpp>
+
+#include <iostream>
+#include <stdio.h>
+#include <cmath>
+#include <iostream>
+#include <stdlib.h>
+#include <time.h>
+#include <math.h>
+#include <string.h>
+#include <sstream>
+#include <termios.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <chrono>
+#include <memory>
+#include <dirent.h>
+
+//Eigen
+#include <Eigen/Dense>
+#include <Eigen/Core>
+#include <Eigen/Eigenvalues>
+#include <Eigen/Geometry>
+
+//sophus
+#include "sophus/so3.hpp"
+#include "sophus/se3.hpp"
+
 
 using namespace std;
 using namespace cv;
 
-namespace handeye
+namespace campub
 {
 
 class ArucoPlane
 {
 public:
     
-    ArucoPlane (float tag_len, float plane_len);
-
+    ArucoPlane (float tagLen, float planeLen);
+    
     /** Member Variables */
     float TAG_SIDE_LEN; //meter
     float PLANE_SIDE_LEN;

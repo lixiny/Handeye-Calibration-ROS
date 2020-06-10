@@ -26,10 +26,13 @@ endif()
 SET(OpenCV_DIR /usr/local/share/OpenCV)
 find_package(OpenCV 3 REQUIRED )
 # cv_bridge
-# SET(cv_bridge_DIR /usr/local/share/cv_bridge)
-# find_package(cv_bridge REQUIRED )
+SET(cv_bridge_DIR /usr/local/share/cv_bridge)
+find_package(cv_bridge REQUIRED )
 # eigen
 find_package(Eigen3 REQUIRED)
+# sophus
+find_package(Sophus REQUIRED)
+
 #ros
 find_package(catkin REQUIRED COMPONENTS
     cv_bridge
@@ -47,20 +50,38 @@ include_directories(
     ${catkin_INCLUDE_DIRS}
     ${EIGEN3_INCLUDE_DIR}
     ${OpenCV_INCLUDE_DIRS}
-    # ${cv_bridge_INCLUDE_DIRS}
+    ${cv_bridge_INCLUDE_DIRS}
+    ${Sophus_INCLUDE_DIRS}
+    ${PROJECT_SOURCE_DIR}/include 
 )
 link_directories(${OpenCV_LIBRARY_DIR})
 
 
 ############### executable ######################
-add_executable(camera_transform_publisher
-    src/camera_transform_publisher.cpp)
+add_executable(chessboard_publisher
+    src/chessboard_publisher.cpp
+    src/aruco_plane.cpp)
+
+add_executable(aruco_publisher
+    src/aruco_publisher.cpp
+    src/aruco_plane.cpp
+)
 
 
-target_link_libraries(camera_transform_publisher
+
+target_link_libraries(chessboard_publisher
     ${catkin_LIBRARIES}
     ${OpenCV_LIBS}
     ${EIGEN3_LIBS}
-    # ${cv_bridge_LIBRARIES}
-    )
+    ${cv_bridge_LIBRARIES}
+    ${Sophus_LIBRARIES}
+)
+
+target_link_libraries(aruco_publisher
+    ${catkin_LIBRARIES}
+    ${OpenCV_LIBS}
+    ${EIGEN3_LIBS}
+    ${cv_bridge_LIBRARIES}
+    ${Sophus_LIBRARIES}
+)
 

@@ -194,7 +194,7 @@ int main(int argc, char** argv )
 
         pcl::RandomSampleConsensus<pcl::PointXYZRGBA> ransac (model_s);
 
-        double threshold = 0.001; // 0.5mm
+        double threshold = 0.001; // 1mm
         ransac.setDistanceThreshold (threshold);
 
         ransac.computeModel();
