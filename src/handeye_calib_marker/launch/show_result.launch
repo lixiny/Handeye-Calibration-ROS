@@ -1,0 +1,11 @@
+<launch>
+  <node pkg="tf" 
+        type="static_transform_publisher" 
+        name="realsense_link" 
+        args="0.0263365 0.0389317 0.0792014  
+              -0.495516 0.507599 -0.496076 0.500715 
+              /ee_link 
+              /camera_link 
+              100"
+  />
+</launch>

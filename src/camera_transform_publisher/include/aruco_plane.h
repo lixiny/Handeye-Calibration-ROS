@@ -10,25 +10,10 @@
 #include <opencv2/highgui.hpp>
 
 #include <iostream>
-#include <stdio.h>
-#include <cmath>
-#include <iostream>
-#include <stdlib.h>
-#include <time.h>
-#include <math.h>
-#include <string.h>
-#include <sstream>
-#include <termios.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <chrono>
-#include <memory>
-#include <dirent.h>
+#include <cstring>
 
 //Eigen
-#include <Eigen/Dense>
 #include <Eigen/Core>
-#include <Eigen/Eigenvalues>
 #include <Eigen/Geometry>
 
 //sophus

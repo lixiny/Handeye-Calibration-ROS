@@ -1,25 +1,11 @@
 #include <opencv2/opencv.hpp>
-#include <opencv2/aruco.hpp>
 #include <opencv2/core.hpp>
 #include <opencv2/calib3d.hpp>
-#include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
 //STD C++ INCLUDES
 #include <iostream>
-#include <stdio.h>
-#include <cmath>
-#include <iostream>
-#include <stdlib.h>
-#include <time.h>
-#include <math.h>
-#include <string.h>
-#include <sstream>
-#include <termios.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <chrono>
-#include <memory>
+#include <cstring>
 
 // ros
 #include <ros/ros.h>
@@ -28,12 +14,9 @@
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 
-
 // tf
 #include <tf/transform_listener.h>
-#include <tf/tfMessage.h>
 #include <tf/transform_broadcaster.h>
-#include <tf/transform_listener.h>
 #include <tf/transform_datatypes.h>
 #include <tf/LinearMath/Matrix3x3.h>
 #include <tf/LinearMath/Quaternion.h>
@@ -42,10 +25,7 @@
 #include <geometry_msgs/TransformStamped.h>
 
 //Eigen
-#include <Eigen/Dense>
 #include <Eigen/Core>
-#include <Eigen/Eigenvalues>
-#include <Eigen/Geometry>
 
 using namespace std;
 using namespace cv;

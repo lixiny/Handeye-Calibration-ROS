@@ -25,12 +25,12 @@ public:
 		: it_(nh_)
 	{
 		// Subscrive to input video feed and publish output video feed
-		image_sub_rgb = it_.subscribe("/realsense_sr300/ylx/rgb",
+		image_sub_rgb = it_.subscribe("/realsense/rgb",
 									  1,
 									  &ImageConverter::imageCb_rgb,
 									  this);
 
-		image_sub_depth = it_.subscribe("/realsense_sr300/ylx/depth",
+		image_sub_depth = it_.subscribe("/realsense/depth",
 										1,
 										&ImageConverter::imageCb_depth,
 										this);

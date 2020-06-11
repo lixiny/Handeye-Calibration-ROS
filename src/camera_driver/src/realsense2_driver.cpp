@@ -56,9 +56,9 @@ int main(int argc, char **argv)
     image_transport::Publisher image_pub_depth;
     ros::Publisher cloud_pub;
 
-    image_pub_color = it.advertise("/realsense_sr300/ylx/rgb", 1);
-    image_pub_depth = it.advertise("/realsense_sr300/ylx/depth", 1);
-    cloud_pub = nh.advertise<PointCloud>("/realsense_sr300/ylx/cloud", 1);
+    image_pub_color = it.advertise("/realsense/rgb", 1);
+    image_pub_depth = it.advertise("/realsense/depth", 1);
+    cloud_pub = nh.advertise<PointCloud>("/realsense/cloud", 1);
 
     // Create a pipeline to easily configure and start the camera
     rs2::pipeline pipe;
@@ -122,11 +122,8 @@ int main(int argc, char **argv)
 
     cout << "Depth Scale:          " << depth_scale << endl;
     cout << "Frame Rate:           " << FRAME_RATE << " frame/sec" << endl;
-    cout << "RGB Encoding:         "
-         << "RGB8" << endl;
-    cout << "Depth Encoding:       "
-         << "TYPE_32FC1 (meter)"
-         << "\n\n";
+    cout << "RGB Encoding:         " << "RGB8" << endl;
+    cout << "Depth Encoding:       " << "TYPE_32FC1 (meter)" << "\n\n";
     cout << "Camera is ready, Everyone is happy NOW !" << endl;
 
     // setup a unRotated unTranslated Transformation between "camera_link" and "camera_optical_frame"

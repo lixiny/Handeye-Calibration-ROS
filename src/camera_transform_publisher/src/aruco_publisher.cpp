@@ -188,9 +188,6 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    cout << "\n Init Complete ! \n"
-         << endl;
-
     ros::NodeHandle nh2;
 
     campub::ArucoPlane aruco(tagSideLen, planeSideLen);

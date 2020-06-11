@@ -10,7 +10,7 @@
       <param name="cameraTopic" type="str"  value="$(arg cameraTopic)" />
       <param name="chessboardWidth"       type="int" value="10"/>
       <param name="chessboardHeight"      type="int" value="7"/>
-      <param name="squareSize"    type="double"  value="0.01" />
+      <param name="squareSize"    type="double"  value="0.025" />
   </node>
 
 </launch>
