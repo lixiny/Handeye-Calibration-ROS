@@ -187,7 +187,7 @@ $2 roslaunch camera_transform_publisher aruco_publisher_realsense.launch \
 Make sure you have already checked them based on the physical length of your aruco plane.
 
 Now in the pop-up window, you will see an AR cube like this:    
-<img src="doc/ar_cube.png" height="240"> <img src="doc/aruco_tf_demo.png" height="240">    
+ <img src="doc/aruco_length_notation.png" height="240"> <img src="doc/ar_cube.png" height="240"> <img src="doc/aruco_tf_demo.png" height="240">    
 
 This `camera_transform_publisher` will publish a tf (`/camera_link`,  `/ar_marker`) to ros master. If no marker found, a Identity SE3 tf will be used.  You can also visualize the two frame in rviz.
 
@@ -195,7 +195,6 @@ This `camera_transform_publisher` will publish a tf (`/camera_link`,  `/ar_marke
 
 Followed the instrction **#3. Bringup UR** in [doc/install_ur.md](./doc/install_ur.md).
 
-Check these 4 tf names before you launch calibraion!
 ### 5. Launch Hand-eye Calibration on Marker
 ```bash
 $3 roslaunch handeye_calib_marker handeye_online.launch
