@@ -131,14 +131,17 @@ cd into the `Handeye-Calibration-ROS/` folder, and source `devel/setup.bash` in 
 ```bash
 $1 roslaunch camera_driver realsense_driver.launch
 ```  
-The camera intrinsic will appear in current terminal, record it (later we call it `CamIntr`).     
+The camera intrinsic (later we call it `intr`) will appear in current terminal, record it.     
 <img src="doc/camera_info.png" width=320 >    
 
 The `camera_driver` publishes 3 topics to rosmaster: 
 * /realsense/rgb
 * /realsense/depth
-* /realsense/cloud   
-(the point cloud is under tf frame: `/camera_link`)
+* /realsense/cloud    
+the point cloud is under tf frame: `/camera_link`
+* /realsense/camera_info  
+the camera_info followed ros [sensor_msgs/CameraInfo.msg](http://docs.ros.org/melodic/api/sensor_msgs/html/msg/CameraInfo.html), we only use `K` and `D` in it. 
+
 
 You can also visualize these topics in `rviz`. 
 
@@ -147,41 +150,53 @@ You can either use a chessboard or an aruco plane at [doc/rawArucoPlane.jpg](./d
 
 ### 3. Publish the Transformation (tf) Between Camera and Marker   
 
-[**IMPORTANT**] Make sure that you have put the `CamIntr` in file: `camera_transform_publisher/camera_intrinsic.xml`.  
-
+  
 #### :smile:  Chessboard 
 After you placed the chessboard inside camera view, run: 
 ```bash
 $2 roslaunch camera_transform_publisher chessboard_publisher_realsense.launch
+
+# or specify chessboard parameters:
+$2 roslaunch camera_transform_publisher chessboard_publisher_realsense.launch \
+        chessboardWidth:=10  chessboardHeight:=7  squareSize:=0.02
 ``` 
-[**IMPORTANT**] There are 3 user-specified parameters in `chessboard_publisher_realsense.launch`: 
+[**IMPORTANT**] There are 5 user-specified parameters in `chessboard_publisher_realsense.launch`: 
 * chessboardWidth -- # of inner corners on chessboard width direction
 * chessboardHeight -- # of inner corners on chessboard height direction
-* squareSize -- length of side of each square on chessboard, in meter.    
+* squareSize -- length of side of each square on chessboard, in meter.   
+* cameraTopic -- the rgb topic name published in your camera_driver, in ours: `/realsense/rgb`
+* cameraInfoTopic -- the camera_info topic name published in your camera_driver, (`/realsense/camera_info`)
 
-Make sure you have already modified them based on your chessboard. 
+Make sure you have already checked them based on your chessboard. 
 
 #### :wink:  Aruco Plane
 After you placed our aruco plane inside camera view, run: 
 ```bash
 $2 roslaunch camera_transform_publisher aruco_publisher_realsense.launch
+
+# or specify aruco plane parameters:
+$2 roslaunch camera_transform_publisher aruco_publisher_realsense.launch \
+        tagSideLen:=0.035 planeSideLen:=0.25 
 ``` 
-[**IMPORTANT**] There are 2 user-specified parameters in `aruco_publisher_realsense.launch`: 
+[**IMPORTANT**] There are 4 user-specified parameters in `aruco_publisher_realsense.launch`: 
 * tagSideLen -- side length of a single aruco tag, in meter. (see illustration)
 * planeSideLen -- side length of the whole aruco plane, in meter.(see illustration)
+* cameraTopic -- the rgb topic name published in your camera_driver, in ours: `/realsense/rgb`
+* cameraInfoTopic -- the camera_info topic name published in your camera_driver, (`/realsense/camera_info`)
 
-Make sure you have already modified them based on the physical length of your aruco plane.
+Make sure you have already checked them based on the physical length of your aruco plane.
 
-Now in the pop-up window, you will see an AR cube.   
+Now in the pop-up window, you will see an AR cube like this:    
 <img src="doc/ar_cube.png" height="240"> <img src="doc/aruco_tf_demo.png" height="240">    
 
 This `camera_transform_publisher` will publish a tf (`/camera_link`,  `/ar_marker`) to ros master. If no marker found, a Identity SE3 tf will be used.  You can also visualize the two frame in rviz.
 
 ### 4. Bringup UR
 
-Followed the instrction #3. **Bringup UR** in [doc/install_ur.md](./doc/install_ur.md).
+Followed the instrction **#3. Bringup UR** in [doc/install_ur.md](./doc/install_ur.md).
 
-### 5. Perform Hand-eye Calibration on Marker
+Check these 4 tf names before you launch calibraion!
+### 5. Launch Hand-eye Calibration on Marker
 ```bash
 $3 roslaunch handeye_calib_marker handeye_online.launch
 ```
@@ -190,26 +205,26 @@ $3 roslaunch handeye_calib_marker handeye_online.launch
 * ARTagTF -- the name of marker frame (defined in `camera_transform_publisher`, `/ar_marker`)
 * cameraTF -- the name of camera frame (defined in `camera_transform_publisher`, `/camera_link`)
 * EETF -- the name of End Effector frame (defined by UR, `/ee_link`)
-* baseTF -- the name of robot base frame (defined by UR, `base_link`)  
+* baseTF -- the name of robot base frame (defined by UR, `/base_link`)  
 
 Check these 4 tf names before you launch calibraion!
 
 #### start calibration
 
-Repeatedly move UR end effector to different configuration. Meanwhile, make sure at each unique ee config, a valid marker can be detected. In current terminal, press `s` to record one `AX=XB` equation. After sufficient # of equations have been recorded (30+), press `q` to perform calibraition. Then in current terminal, you will see some output like:   
+Repeatedly move UR end effector to different configuration. Meanwhile, make sure at each unique configuration, a valid marker can be detected. In current terminal, press `s` to record one `AX=XB` equation. After sufficient # of equations have been recorded (30+), press `q` to perform calibraition. Then in current terminal, you will see some output like:   
 <img src="doc/calib_marker_output.png" width="560">
 
 
 #### publish the results  
 modify the file: `handeye_calib_marker/launch/show_result.launch`, 
-replace the `$Translation(xyz)` and `$Rotationq(xyzw)` based on your terminal output.   
+replace the `${Translation: x y z}` and `${Rotation: qx qy qz qw}` based on your terminal output.   
 ```xml
 <launch>
   <node pkg="tf" 
         type="static_transform_publisher" 
         name="realsense_link" 
-        args="$Translation(xyz) 
-              $Rotationq(xyzw)
+        args="${Translation: x y z}
+              ${Rotation: qx qy qz qw}
               /ee_link 
               /camera_link 
               100"
@@ -235,15 +250,15 @@ $4 rosrun tf static_transform_publisher ＼
 
 <img src="doc/calib_marker_result.png" width="480">
 
-There are several representations / expressions of the HAND-EYE problem:  
+There are several representations/expressions of the HAND-EYE problem:  
 * HAND-EYE is the transformation from `/ee_link` to `/camera_link`  
-* or the tf: (`/ee_link`,  `/camera_link`)  
+* or tf: (`/ee_link`,  `/camera_link`)  
 * or father: `/ee_link`,  child: `/camera_link`   
-* or $P_{ee_link} = T_{handeye} * P_{camera_link}$  
+* or: P<sub>ee_link</sub> = T<sub>handeye</sub> * P<sub>camera_link</sub>
 
 
 **NOTE**: now you should have a ready-to-use handeye transformation.  
-This results is optimized only from RGB images. You can still fine-tune the result based on depth image (if has).  
+This results is optimized only based on RGB images. You can still fine-tune the result with depth image (if has) following setp # 6.  
 
 ### 6. (Optional) Fine-tune on Sphere
 

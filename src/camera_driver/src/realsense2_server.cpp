@@ -69,7 +69,7 @@ int main(int argc, char **argv)
 	ros::NodeHandle n;
 	ros::ServiceServer service = n.advertiseService("realsense2_server", realsense2_server);
 
-	ros::Rate loop_rate(200);
+	ros::Rate loop_rate(60);
 	while (ros::ok())
 	{
 		ros::spinOnce();

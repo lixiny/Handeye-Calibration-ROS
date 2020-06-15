@@ -32,27 +32,6 @@ using namespace cv;
 string camera_link;
 string ar_marker;
 
-bool initCameraIntrinsic(const std::string &CAMERA_DATA_FILE, Mat &cameraMatrix, Mat &distCoeffs)
-{
-    FileStorage fs(CAMERA_DATA_FILE, FileStorage::READ);
-    fs["camera_matrix"] >> cameraMatrix;
-    fs["distortion_coeffs"] >> distCoeffs;
-
-    cout << "Camera instrinsic matrix" << endl;
-    cout << cameraMatrix << endl;
-    cout << "camera distortion coefficients" << endl;
-    cout << distCoeffs << endl;
-
-    fs.release();
-
-    if (cameraMatrix.empty())
-        return false;
-    if (distCoeffs.empty())
-        return false;
-
-    return true;
-}
-
 class ArucoExtractor
 {
     image_transport::ImageTransport it;
@@ -78,10 +57,10 @@ public:
                                paruco(ap_),
                                cameraTopic(CameraTopic_)
     {
-        image_sub_rgb = it.subscribe(cameraTopic, 1, &ArucoExtractor::imageCb_rgb, this);
+        image_sub_rgb = it.subscribe(cameraTopic, 1, &ArucoExtractor::imageCB, this);
     }
 
-    void imageCb_rgb(const sensor_msgs::ImageConstPtr &msg)
+    void imageCB(const sensor_msgs::ImageConstPtr &msg)
     {
         rgb_msg = *msg;
         try
@@ -126,10 +105,10 @@ public:
             tranform.setOrigin(tf::Vector3(0.0, 0.0, 0.0));
             tranform.setRotation(tf::Quaternion(0, 0, 0, 1));
 
-            br.sendTransform(tf::StampedTransform(
-                tranform, ros::Time::now(),
-                camera_link,
-                ar_marker));
+            br.sendTransform(tf::StampedTransform(tranform,
+                                                  ros::Time::now(),
+                                                  camera_link,
+                                                  ar_marker));
             return;
         }
 
@@ -158,42 +137,70 @@ public:
     }
 };
 
+class CameraInfo
+{
+public:
+    cv::Mat intrinsic = cv::Mat::eye(3, 3, CV_32F);
+    cv::Mat distortion = cv::Mat::zeros(1, 5, CV_32F);
+    int readyflag = 0;
+
+    CameraInfo() {}
+    void cameraInfoCb(const sensor_msgs::CameraInfo::ConstPtr &msg)
+    {
+        cout << "\e[1;34m"
+             << "I received a camera_info."
+             << "\e[0m" << endl;
+        readyflag = 1;
+        for (int i = 0; i < 3; i++)
+            for (int j = 0; j < 3; j++)
+                intrinsic.at<float>(i, j) = msg->K[3 * i + j];
+        for (int j = 0; j < 5; j++)
+            distortion.at<float>(0, j) = msg->D[j];
+        cout << "intrinsic fx fy cy cy : " << intrinsic.at<float>(0, 0) << " "
+             << intrinsic.at<float>(1, 1) << " "
+             << intrinsic.at<float>(0, 2) << " "
+             << intrinsic.at<float>(1, 2) << endl;
+        cout << "distortion : " << distortion << endl;
+    }
+};
+
 int main(int argc, char **argv)
 {
     cout << "\n\n";
     ros::init(argc, argv, "aruco_publisher");
     ros::NodeHandle nh("~");
 
-    string cameraIntrinsicInput;
     string cameraTopic;
+    string cameraInfoTopic;
     string rgbdServiceName;
-    cv::Mat cameraMatrix;
-    cv::Mat distCoeffs;
     float tagSideLen;
     float planeSideLen;
 
-    nh.param("cameraIntrinsicInput", cameraIntrinsicInput, std::string("./camera_intrinsic_color.xml"));
     nh.param("cameraTopic", cameraTopic, std::string("/camera/image"));
+    nh.param("cameraInfoTopic", cameraInfoTopic, std::string("/realsense/camera_info"));
     nh.param("cameraLinkName", camera_link, std::string("/camera_link"));
     nh.param("arMarkerName", ar_marker, std::string("/ar_marker"));
     nh.param("tagSideLen", tagSideLen, 0.035f);
     nh.param("planeSideLen", planeSideLen, 0.25f);
     nh.param("rgbdServiceName", rgbdServiceName, std::string("realsense2_server"));
 
-    cout << "Reading Camera Intrinsic File from : " << cameraIntrinsicInput << endl;
-
-    if (!initCameraIntrinsic(cameraIntrinsicInput, cameraMatrix, distCoeffs))
-    {
-        cerr << "FATAL:  Cannot locate [camera_intrinsics] XML file Or [camera_intrinsics] XML file contains invalid data. Program will exit." << endl;
-        return -1;
-    }
+    ros::Subscriber camera_info_sub;
+    ros::NodeHandle nci;
+    CameraInfo ci;
+    camera_info_sub = nci.subscribe(cameraInfoTopic, 1, &CameraInfo::cameraInfoCb, &ci);
+    while (!ci.readyflag)
+        ros::spinOnce();
+    nci.shutdown();
 
     ros::NodeHandle nh2;
 
     campub::ArucoPlane aruco(tagSideLen, planeSideLen);
-    aruco.setCameraIntrinsic(cameraMatrix, distCoeffs);
+    aruco.setCameraIntrinsic(ci.intrinsic, ci.distortion);
 
-    ArucoExtractor ae(nh2, &aruco, cameraMatrix, distCoeffs, cameraTopic);
+    ArucoExtractor ae(nh2, &aruco, ci.intrinsic, ci.distortion, cameraTopic);
+    cout << "\e[1;33m"
+         << "Aurco publisher is ready."
+         << "\e[0m" << endl;
     ros::spin();
 
     return 0;

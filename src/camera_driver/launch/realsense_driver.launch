@@ -1,4 +1,11 @@
 <launch>
-  <node pkg="camera_driver" name="realsense2_driver" type="realsense2_driver" output="screen" />
-  <node pkg="camera_driver" name="realsense2_server" type="realsense2_server" />
+
+  <arg name="resWidth" default="640"/>
+  <arg name="resHeight" default="480"/>
+
+  <node pkg="camera_driver" name="realsense2_driver" type="realsense2_driver" output="screen">
+      <param name="resWidth"  type="int"  value="$(arg resWidth)" />
+      <param name="resHeight"  type="int"  value="$(arg resHeight)" />
+  </node>
+  <!-- <node pkg="camera_driver" name="realsense2_server" type="realsense2_server" /> -->
 </launch>

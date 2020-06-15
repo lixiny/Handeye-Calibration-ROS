@@ -1,0 +1,42 @@
+<launch>
+  <!-- TF names-->
+  <!-- AR Tag TF frame, the ros topic for the tf frame seen by the camera sensor,
+       this need not be an actual AR tag, for example, it could be an optical tracker
+       marker, or a position on the gripper you detect directly -->
+  <arg name="ARTagTF"           default="/ar_marker" />
+
+  <!-- Camera Transform, the ros topic for the tf frame of your camera sensor -->
+  <arg name="cameraTF"          default="/camera_link" />
+
+  <!-- End Effector Transform, the ros topic for the tf frame
+       at the tip of your robot's gripper or other tool -->
+
+  <!-- End Effector Transform, the ros topic for the tf frame
+       at the tip of your robot's gripper or other tool -->
+  <arg name="EETF"              default="/ee_link" />
+
+  <!-- Robot Base Transform, the ros topic for the base tf frame of your robot -->
+  <arg name="baseTF"            default="/base" />
+
+  <arg name="planeSideLen"      default="0.25"/>
+
+  <arg name="dataFolder"       default="$(find handeye_calib_sphere)/example" />
+
+  <arg name="initHandToEyeTFFile"     default="CalibratedTransform.yml" />
+  <arg name="finetuneHandToEyeTFFile"     default="FinetunedTransform.yml" />
+  <arg name="transformPairsRecordFile"     default="TransformPairsRecord.yml" />
+
+  <node pkg="handeye_calib_sphere" type="eyeinhand_calib" name="eyeinhand_calib" output="screen">
+  <!-- handeye_calib_sphere arg pass -->
+      <param name="ARTagTF"       type="str" value="$(arg ARTagTF)" />
+      <param name="cameraTF"      type="str" value="$(arg cameraTF)" />
+      <param name="EETF"          type="str"  value="$(arg EETF)" />
+      <param name="baseTF"        type="str"  value="$(arg baseTF)" />
+      <param name="planeSideLen"  type="double"  value="$(arg planeSideLen)" />
+      <param name="initHandToEyeTFPath"        type="str"   value="$(arg dataFolder)/$(arg initHandToEyeTFFile)" />
+      <param name="finetuneHandToEyeTFPath"    type="str"   value="$(arg dataFolder)/$(arg finetuneHandToEyeTFFile)" />  
+      <param name="transformPairsRecordPath"   type="str"   value="$(arg dataFolder)/$(arg transformPairsRecordFile)" />
+
+  </node>
+
+</launch>

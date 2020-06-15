@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 2.8)
-# add_compile_options(-std=c++11)
 project(handeye_calib_sphere)
 
 
@@ -14,7 +13,6 @@ else()
     message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
 
-
 ############### dependencies ######################
 # 添加cmake模块以使用ceres库
 list( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules/ )
@@ -25,7 +23,7 @@ add_definitions(${PCL_DEFINITIONS})
 # Opencv
 SET(OpenCV_DIR /usr/local/share/OpenCV)
 find_package(OpenCV 3 REQUIRED)
-# # cv_bridge
+# cv_bridge
 SET(cv_bridge_DIR /usr/local/share/cv_bridge)
 find_package(cv_bridge REQUIRED )
 # ceres-solver
@@ -42,7 +40,7 @@ find_package(catkin REQUIRED COMPONENTS
     sensor_msgs
     std_msgs
     tf
-    rgbd_srv
+#    rgbd_srv
 )
 catkin_package()
 
@@ -56,7 +54,7 @@ include_directories(
     ${catkin_INCLUDE_DIRS}
     ${OpenCV_INCLUDE_DIRS}
     ${PCL_INCLUDE_DIRS}
-    # ${cv_bridge_INCLUDE_DIRS}
+    ${cv_bridge_INCLUDE_DIRS}
     ${CERES_INCLUDE_DIRS}
     ${Sophus_INCLUDE_DIRS}
     ${PROJECT_SOURCE_DIR}/include 
@@ -68,24 +66,39 @@ link_directories(${OpenCV_LIBRARY_DIR})
 link_directories(${PCL_LIBRARY_DIRS})
 
 
-
 ############### executable ######################
 
-add_executable(grab_data_node
-    src/grab_data_node.cpp
-    src/CalibrationTool.cpp
-    src/ArucoPlane.cpp)
 
-add_dependencies(grab_data_node rgbd_srv_gencpp)
+add_executable(eyeinhand_calib
+    src/eyeinhand_calib.cpp
+    src/CalibrationTool.cpp)
 
-
-target_link_libraries(grab_data_node
+target_link_libraries(eyeinhand_calib
+	${catkin_LIBRARIES}
 	${OpenCV_LIBS}
 	${PCL_LIBRARIES}
+	${CERES_LIBRARIES}
     ${Sophus_LIBRARIES}
-    # ${cv_bridge_LIBRARIES}
-    ${catkin_LIBRARIES}
+    ${cv_bridge_LIBRARIES}
 )
+
+
+
+
+# add_executable(grab_data_node
+#     src/grab_data_node.cpp
+#     src/CalibrationTool.cpp
+#     src/ArucoPlane.cpp)
+
+# add_dependencies(grab_data_node rgbd_srv_gencpp)
+
+# target_link_libraries(grab_data_node
+# 	${OpenCV_LIBS}
+# 	${PCL_LIBRARIES}
+#     ${Sophus_LIBRARIES}
+#     ${cv_bridge_LIBRARIES}
+#     ${catkin_LIBRARIES}
+# )
 
 
 add_executable(eyeinhand_calib_node
@@ -98,7 +111,7 @@ target_link_libraries(eyeinhand_calib_node
 	${PCL_LIBRARIES}
 	${CERES_LIBRARIES}
     ${Sophus_LIBRARIES}
-    # ${cv_bridge_LIBRARIES}
+    ${cv_bridge_LIBRARIES}
 )
 
 

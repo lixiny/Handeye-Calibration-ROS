@@ -61,7 +61,7 @@ Alternative DNS server : 0.0.0.0
 ## 3. Bringup UR
 
 At your UR control panel, go to the initialization screen, press *ON* -> *START*.  
-At your PC,  `cd ur_ws` and  `source devel/setup.bash` at each terminal. 
+At your PC,  cd `ur_ws` and source `devel/setup.bash` at each terminal. 
 
 Start UR driver
 ```bash

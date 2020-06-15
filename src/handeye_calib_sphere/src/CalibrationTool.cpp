@@ -1,7 +1,4 @@
-#include "settings.h"
 #include "CalibrationTool.h"
-#include "CommonInclude.h"
-
 
 using namespace std;
 using namespace cv;
@@ -306,105 +303,6 @@ Mat calcBoardCornerPositions(Size boardSize, float squareSize)
     return boardCorners;
 }
 
-bool calculate_extrinsic(Mat image,
-                         Mat *transform,
-                         Mat boardCorners,
-                         Mat cameraMatrix,
-                         Mat distCoeffs,
-                         Settings s)
-{
-    Size imageSize;
-    imageSize = image.size();
-    vector<Point2f> cornerPointBuf;
-    bool isFound;
-    Mat viewTemp;
-    cv::cvtColor(image, viewTemp, COLOR_BGR2GRAY);
-    cout << "calibration boardsize: " << s.boardSize << endl;
-
-    isFound = cv::findChessboardCorners(image,
-                                        s.boardSize,
-                                        cornerPointBuf,
-                                        CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_NORMALIZE_IMAGE);
-    if (isFound)
-    {
-        cout << "******************** happily found corners ********************" << endl;
-
-        // improve the found corners' coordinate accuracy for chessboard
-        Mat viewGray;
-        cv::cvtColor(image, viewGray, COLOR_BGR2GRAY);
-        cv::cornerSubPix( viewGray, cornerPointBuf, Size(11,11),Size(-1,-1),
-                          TermCriteria( CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, 30, 0.1 ));
-
-        cv::drawChessboardCorners(image, s.boardSize, Mat(cornerPointBuf), isFound);
-
-        Mat imageWithCorners = image.clone();
-        imshow("image", imageWithCorners);
-        waitKey(0);
-
-        Mat imagePoint(cornerPointBuf.size(), 2, CV_32F);
-        for (int i = 0; i < cornerPointBuf.size(); i++) {
-            imagePoint.at<float>(i,0) = cornerPointBuf[i].x;
-            imagePoint.at<float>(i,1) = cornerPointBuf[i].y;
-        }
-
-        CvMat* cv_rotarion_vector =  cvCreateMat(3,1,CV_32F);
-        CvMat* cv_translation_vector = cvCreateMat(3,1,CV_32F);
-        CvMat cv_objectpoint = boardCorners;
-        CvMat cv_imagepoint = imagePoint;
-        CvMat cv_cameraMatrix = cameraMatrix;
-        CvMat cv_distCoeffs = distCoeffs;
-
-        cvFindExtrinsicCameraParams2(&cv_objectpoint,
-                                     &cv_imagepoint,
-                                     &cv_cameraMatrix,
-                                     &cv_distCoeffs,
-                                     cv_rotarion_vector,
-                                     cv_translation_vector);
-
-        float *rotationPtr = (float*)cvPtr2D(cv_rotarion_vector,0,0);
-        float r1,r2,r3;
-        r1 = *rotationPtr;
-        rotationPtr++;
-        r2 = *rotationPtr;
-        rotationPtr++;
-        r3 = *rotationPtr;
-
-        float *translationPtr = (float*)cvPtr2D(cv_translation_vector,0,0);
-        float t1,t2,t3;
-        t1 = *translationPtr;
-        translationPtr++;
-        t2 = *translationPtr;
-        translationPtr++;
-        t3 = *translationPtr;
-
-        cv::Mat rodri(3,1,CV_64F);
-        rodri.at<double>(0,0)=r1;
-        rodri.at<double>(1,0)=r2;
-        rodri.at<double>(2,0)=r3;
-
-        Mat rotMat(3,3,CV_64F);
-        Rodrigues(rodri,rotMat);
-
-        transform->at<double>(0,3)=t1;
-        transform->at<double>(1,3)=t2;
-        transform->at<double>(2,3)=t3;
-        transform->at<double>(3,3)=1;
-
-        transform->at<double>(3,0)=0;
-        transform->at<double>(3,1)=0;
-        transform->at<double>(3,2)=0;
-
-        for (int i=0;i<3;i++){
-            for(int j=0;j<3;j++){
-                transform->at<double>(i,j)=rotMat.at<double>(i,j);
-            }
-        }
-        return true;
-    } else {
-        cout << "Not found chessboard" << endl;
-        return false;
-    }
-}
 
 
 vector<string> getFilesInDirectory ( const string& cate_dir, const string suffix) {

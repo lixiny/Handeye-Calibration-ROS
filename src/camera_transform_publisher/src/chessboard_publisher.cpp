@@ -13,6 +13,7 @@
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
+#include <sensor_msgs/CameraInfo.h>
 
 // tf
 #include <tf/transform_listener.h>
@@ -22,7 +23,6 @@
 #include <tf/LinearMath/Quaternion.h>
 #include <tf/LinearMath/Vector3.h>
 #include <tf/LinearMath/Transform.h>
-#include <geometry_msgs/TransformStamped.h>
 
 //Eigen
 #include <Eigen/Core>
@@ -120,7 +120,6 @@ public:
                                                   ros::Time::now(),
                                                   camera_link,
                                                   ar_marker));
-            vector<cv::Point2f>().swap(pointBuf);
             return;
         }
 
@@ -239,63 +238,64 @@ public:
     }
 };
 
-bool initCameraIntrinsic(const std::string &CAMERA_DATA_FILE, Mat &cameraMatrix, Mat &distCoeffs)
+class CameraInfo
 {
-    FileStorage fs(CAMERA_DATA_FILE, FileStorage::READ);
-    fs["camera_matrix"] >> cameraMatrix;
-    fs["distortion_coeffs"] >> distCoeffs;
+public:
+    cv::Mat intrinsic = cv::Mat::eye(3, 3, CV_32F);
+    cv::Mat distortion = cv::Mat::zeros(1, 5, CV_32F);
+    int readyflag = 0;
 
-    cout << "Camera instrinsic matrix" << endl;
-    cout << cameraMatrix << endl;
-    cout << "camera distortion coefficients" << endl;
-    cout << distCoeffs << endl;
-
-    fs.release();
-
-    if (cameraMatrix.empty())
-        return false;
-    if (distCoeffs.empty())
-        return false;
-
-    return true;
-}
+    CameraInfo() {}
+    void cameraInfoCb(const sensor_msgs::CameraInfo::ConstPtr &msg)
+    {
+        cout << "\e[1;34m"
+             << "I received a camera_info."
+             << "\e[0m" << endl;
+        readyflag = 1;
+        for (int i = 0; i < 3; i++)
+            for (int j = 0; j < 3; j++)
+                intrinsic.at<float>(i, j) = msg->K[3 * i + j];
+        for (int j = 0; j < 5; j++)
+            distortion.at<float>(0, j) = msg->D[j];
+    }
+};
 
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "chessboard_publisher");
     ros::NodeHandle nh("~");
 
-    string cameraIntrinsicInput;
     string cameraTopic;
-    cv::Mat cameraMatrix;
-    cv::Mat distCoeffs;
+    string cameraInfoTopic;
     cv::Size boardSize;
     float squareSize;
     int chessboardWidth;
     int chessboardHeight;
 
-    nh.param("cameraIntrinsicInput", cameraIntrinsicInput, std::string("./camera_intrinsic.xml"));
     nh.param("chessboardWidth", chessboardWidth, 11);
     nh.param("chessboardHeight", chessboardHeight, 8);
     nh.param("squareSize", squareSize, 0.01f);
-    nh.param("cameraTopic", cameraTopic, std::string("/camera/image"));
+    nh.param("cameraTopic", cameraTopic, std::string("/realsense/rgb"));
+    nh.param("cameraInfoTopic", cameraInfoTopic, std::string("/realsense/camera_info"));
     nh.param("cameraLinkName", camera_link, std::string("/camera_link"));
     nh.param("arMarkerName", ar_marker, std::string("/ar_marker"));
 
-    if (!initCameraIntrinsic(cameraIntrinsicInput, cameraMatrix, distCoeffs))
-    {
-        cerr << "FATAL:  Cannot locate [camera_intrinsics] XML file Or"
-                " [camera_intrinsics] XML file contains invalid data. Program will exit."
-             << endl;
-        return -1;
-    }
+    ros::Subscriber camera_info_sub;
+    ros::NodeHandle nci;
+    CameraInfo ci;
+    camera_info_sub = nci.subscribe(cameraInfoTopic, 1, &CameraInfo::cameraInfoCb, &ci);
+    while (!ci.readyflag)
+        ros::spinOnce();
+    nci.shutdown();
 
-    cout << "Using CHESSBOARD with --size " << chessboardWidth << " x " << chessboardHeight << " --square " << squareSize << "\n\n";
     boardSize.width = chessboardWidth;
     boardSize.height = chessboardHeight;
 
     ros::NodeHandle nh2;
-    ChessBoardExtractor ce(nh2, boardSize, squareSize, cameraMatrix, distCoeffs, cameraTopic);
+    ChessBoardExtractor ce(nh2, boardSize, squareSize, ci.intrinsic, ci.distortion, cameraTopic);
+    cout << "\e[1;33m"
+         << "Chessboard publisher is ready."
+         << "\e[0m" << endl;
 
     ros::spin();
 }

@@ -40,7 +40,7 @@ public:
 
         // Rotate the point using Eigen rotations
         // cout << "pointInCamerai :" << T(pointInCamerai[0]) << " " << T(pointInCamerai[1]) << " " << T(pointInCamerai[2]) << endl;
-        Eigen::Matrix<T,3,1> pointInGripperi = q_handeye * pointInCamerai; // unfinished !!!
+        Eigen::Matrix<T,3,1> pointInGripperi = q_handeye * pointInCamerai;
         // Map T* to Eigen Vector3 with correct Scalar type
         pointInGripperi += t_handeye;
 
@@ -50,11 +50,14 @@ public:
         auto translbgi = Tfbgi.translation();
         Eigen::Quaterniond qbgi(rotbgi);
         Eigen::Quaternion<T> q_bgi;
-        q_bgi.w() = T(qbgi.w());    q_bgi.x() = T(qbgi.x());   q_bgi.y() = T(qbgi.y());   q_bgi.z() = T(qbgi.z());
+        q_bgi.w() = T(qbgi.w());    
+        q_bgi.x() = T(qbgi.x());   
+        q_bgi.y() = T(qbgi.y());   
+        q_bgi.z() = T(qbgi.z());
         Eigen::Matrix<T,3,1> t_bgi;
         t_bgi << T(translbgi.x()) , T(translbgi.y()), T(translbgi.z());
 
-        Eigen::Matrix<T,3,1> pointInBasei = q_bgi * pointInGripperi;  // unfinished !!
+        Eigen::Matrix<T,3,1> pointInBasei = q_bgi * pointInGripperi;  
         pointInBasei += t_bgi;
 
 
@@ -63,7 +66,7 @@ public:
         pointInCameraj << T(PInCameraj.x()), T(PInCameraj.y()), T(PInCameraj.z());
 
         /** Transform pointInCamra to pointInGripper for position j */
-        Eigen::Matrix<T,3,1> pointInGripperj = q_handeye * pointInCameraj; // unfinished !!!
+        Eigen::Matrix<T,3,1> pointInGripperj = q_handeye * pointInCameraj;
         pointInGripperj += t_handeye;
 
         /** Transform pointInGripper to pointInBase for position j */
@@ -75,7 +78,7 @@ public:
         Eigen::Matrix<T,3,1> t_bgj;
         t_bgj << T(translbgj.x()) , T(translbgj.y()), T(translbgj.z());
 
-        Eigen::Matrix<T,3,1> pointInBasej = q_bgj * pointInGripperj;  // unfinished !!
+        Eigen::Matrix<T,3,1> pointInBasej = q_bgj * pointInGripperj;  
         pointInBasej += t_bgj;
 
         residuals[0] = T(T(pointInBasei[0]) - T(pointInBasej[0]));  //   deltaX = Xi - Xj
