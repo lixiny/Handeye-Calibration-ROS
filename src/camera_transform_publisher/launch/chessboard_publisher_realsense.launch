@@ -1,0 +1,19 @@
+<launch>
+
+
+  <arg name="cameraIntrinsicInput"  default="$(find camera_transform_publisher)/camera_intrinsic.xml" />
+  <arg name="cameraTopic"  default="/realsense/rgb" />
+  <arg name="cameraInfoTopic"  default="/realsense/camera_info" />
+  <arg name="chessboardWidth" default="10"/>
+  <arg name="chessboardHeight" default="7"/>
+  <arg name="squareSize" default="0.025"/>
+
+  <node pkg="camera_transform_publisher" type="chessboard_publisher" name="chessboard_publisher" output="screen">
+      <param name="cameraTopic" type="str"  value="$(arg cameraTopic)" />
+      <param name="cameraInfoTopic" type="str"  value="$(arg cameraInfoTopic)" />
+      <param name="chessboardWidth"       type="int" value="$(arg chessboardWidth)"/>
+      <param name="chessboardHeight"      type="int" value="$(arg chessboardHeight)"/>
+      <param name="squareSize"    type="double"  value="$(arg squareSize)" />
+  </node>
+
+</launch>

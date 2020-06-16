@@ -23,8 +23,8 @@ add_definitions(${PCL_DEFINITIONS})
 SET(OpenCV_DIR /usr/local/share/OpenCV)
 find_package(OpenCV 3 REQUIRED)
 # cv_bridge
-# SET(cv_bridge_DIR /usr/local/share/cv_bridge)
-# find_package(cv_bridge REQUIRED )
+SET(cv_bridge_DIR /usr/local/share/cv_bridge)
+find_package(cv_bridge REQUIRED )
 #realsense
 find_package(realsense2 REQUIRED)
 #ros
@@ -46,7 +46,7 @@ catkin_package()
 include_directories(
     ${realsense2_INCLUDE_DIR}
     ${OpenCV_INCLUDE_DIRS}
-    # ${cv_bridge_INCLUDE_DIRS}
+    ${cv_bridge_INCLUDE_DIRS}
     ${PCL_INCLUDE_DIRS}
     ${catkin_INCLUDE_DIRS}
 )
@@ -66,13 +66,13 @@ target_link_libraries(realsense2_driver
    ${OpenCV_LIBS}
    ${PCL_LIBRARIES}
    ${realsense2_LIBRARY}  
-#    ${cv_bridge_LIBRARIES}
+   ${cv_bridge_LIBRARIES}
    ${catkin_LIBRARIES}
    
 )
 target_link_libraries(realsense2_server
    ${OpenCV_LIBS}
    ${PCL_LIBRARIES}
-#    ${cv_bridge_LIBRARIES}
+   ${cv_bridge_LIBRARIES}
    ${catkin_LIBRARIES}
 )

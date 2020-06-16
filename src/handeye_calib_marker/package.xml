@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <name>handeye_calib_chessboard</name>
+  <name>handeye_calib_marker</name>
   <version>0.0.0</version>
-  <description>The handeye_calib_chessboard package</description>
+  <description>The handeye_calib_marker package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->

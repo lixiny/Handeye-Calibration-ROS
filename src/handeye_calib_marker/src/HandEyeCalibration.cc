@@ -157,7 +157,8 @@ void HandEyeCalibration::estimateHandEyeScrew(
                       Eigen::aligned_allocator<Eigen::Vector3d>>& rvecs2,
     const std::vector<Eigen::Vector3d,
                       Eigen::aligned_allocator<Eigen::Vector3d>>& tvecs2,
-    Eigen::Matrix4d& H_12, ceres::Solver::Summary& summary, bool planarMotion) {
+    Eigen::Matrix4d& H_12, ceres::Solver::Summary& summary, bool planarMotion) 
+{
     int motionCount = rvecs1.size();
     Eigen::MatrixXd T(motionCount * 6, 8);
     T.setZero();
@@ -196,7 +197,8 @@ void HandEyeCalibration::estimateHandEyeScrew(
 // docs in header
 DualQuaterniond
 HandEyeCalibration::estimateHandEyeScrewInitial(Eigen::MatrixXd& T,
-                                                bool planarMotion) {
+                                                bool planarMotion) 
+{
 
     // dq(r1, t1) = dq * dq(r2, t2) * dq.inv
     Eigen::JacobiSVD<Eigen::MatrixXd> svd(T, Eigen::ComputeFullU |

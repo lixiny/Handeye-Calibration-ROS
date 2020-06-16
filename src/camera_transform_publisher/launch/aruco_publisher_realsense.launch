@@ -1,0 +1,17 @@
+<launch>
+
+
+  <arg name="cameraIntrinsicInput"  default="$(find camera_transform_publisher)/camera_intrinsic.xml" />
+  <arg name="cameraInfoTopic"  default="/realsense/camera_info" />
+  <arg name="cameraTopic"  default="/realsense/rgb" />
+  <arg name="tagSideLen" default="0.035"/>
+  <arg name="planeSideLen" default="0.25"/>
+
+  <node pkg="camera_transform_publisher" type="aruco_publisher" name="aruco_publisher" output="screen">
+      <param name="cameraTopic" type="str"  value="$(arg cameraTopic)" />
+      <param name="cameraInfoTopic" type="str"  value="$(arg cameraInfoTopic)" />
+      <param name="tagSideLen"  type="double"  value="$(arg tagSideLen)" />
+      <param name="planeSideLen"  type="double"  value="$(arg planeSideLen)" />
+  </node>
+
+</launch>
