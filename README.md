@@ -280,4 +280,4 @@ Yang, Lixin, et al. " **Robotic hand-eye calibration with depth camera: A sphere
 
 
 ## License
-handeyeCalibWithDepthCamera is freely available for free non-commercial use, and may be redistributed under these conditions. Please, see the [license](LICENSE) for further details
+This repo is freely available for free non-commercial use, and may be redistributed under these conditions. Please, see the [license](LICENSE) for further details
