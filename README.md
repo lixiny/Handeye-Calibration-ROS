@@ -122,11 +122,15 @@ $ catkin_make
 ## Ready to Use (Example on RealSense D415 & UR5)
 
 ### 0. Robot and Camera Setup 
+Prepare a camera support that mount camera on the robot.
+We provide the support files [[.STL](https://drive.google.com/drive/folders/1FE3HGbmlFs6624TXb8Hcq-Yg9Z0TvEBg?usp=sharing)] for UR5 and RealSense D415 & SR300.
+<img src="doc/camera_support.png" width=720>
 
-<img src="doc/setup.png" width=640>
+
+<img src="doc/setup.png" width=720>
 
 
-cd into the `Handeye-Calibration-ROS/` folder, and source `devel/setup.bash` in each new terminal.
+Navigate to the `Handeye-Calibration-ROS/` folder, and source `devel/setup.bash` in each new terminal.
 ### 1. Pluged in Camera, Bringup RealSense   
 ```bash
 $1 roslaunch camera_driver realsense_driver.launch
